@@ -1,10 +1,9 @@
 package br.com.inovagab.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -14,48 +13,51 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    private final SecretKey secretKey;
-    private final long expirationMs;
+    @Value("${api.security.token.secret}")
+    private String jwtSecret;
 
-    public JwtTokenProvider(
-            @Value("${inovagab.jwt.secret}") String secret,
-            @Value("${inovagab.jwt.expiration-ms}") long expirationMs) {
-        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-        this.expirationMs = expirationMs;
+    private final int jwtExpirationMs = 86400000; // 24h
+
+    private SecretKey getSigningKey() {
+        byte[] keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(UserPrincipal userPrincipal) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expirationMs);
-
+    public String generateToken(String userId, String role) {
         return Jwts.builder()
-                .subject(userPrincipal.getId())
-                .claim("email", userPrincipal.getUsername())
-                .claim("role", userPrincipal.getRole().name())
-                .issuedAt(now)
-                .expiration(expiryDate)
-                .signWith(secretKey)
+                .subject(userId)
+                .claim("role", role)
+                .issuedAt(new Date())
+                .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .signWith(getSigningKey())
                 .compact();
     }
 
-    public String getUserIdFromToken(String token) {
-        return parseClaims(token).getSubject();
-    }
-
-    public boolean validateToken(String token) {
-        try {
-            parseClaims(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
-    }
-
-    private Claims parseClaims(String token) {
+    public String getUserIdFromJwt(String token) {
         return Jwts.parser()
-                .verifyWith(secretKey)
+                .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
-                .getPayload();
+                .getPayload()
+                .getSubject();
+    }
+    
+    public String getRoleFromJwt(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("role", String.class);
+    }
+
+    public boolean validateToken(String authToken) {
+        try {
+            Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(authToken);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            System.err.println("Invalid JWT token: " + e.getMessage());
+        }
+        return false;
     }
 }

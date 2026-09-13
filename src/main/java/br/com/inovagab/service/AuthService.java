@@ -3,94 +3,61 @@ package br.com.inovagab.service;
 import br.com.inovagab.dto.request.LoginRequest;
 import br.com.inovagab.dto.request.RegisterRequest;
 import br.com.inovagab.dto.response.AuthResponse;
-import br.com.inovagab.dto.response.UserResponse;
-import br.com.inovagab.exception.BusinessException;
-import br.com.inovagab.exception.ResourceNotFoundException;
-import br.com.inovagab.model.Role;
 import br.com.inovagab.model.Usuario;
 import br.com.inovagab.repository.UsuarioRepository;
 import br.com.inovagab.security.JwtTokenProvider;
-import br.com.inovagab.security.UserPrincipal;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
-@RequiredArgsConstructor
 public class AuthService {
 
-    private final UsuarioRepository usuarioRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider tokenProvider;
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
-    public AuthResponse login(LoginRequest request) {
-        Usuario usuario = usuarioRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BusinessException("Credenciais inválidas"));
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-        if (!passwordEncoder.matches(request.getPassword(), usuario.getSenha())) {
-            throw new BusinessException("Credenciais inválidas");
+    @Autowired
+    private JwtTokenProvider tokenProvider;
+
+    public AuthResponse authenticateUser(LoginRequest loginRequest) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(loginRequest.getEmail());
+        
+        if (usuarioOpt.isEmpty()) {
+            throw new RuntimeException("Usuário não encontrado.");
         }
 
-        // Valida se o perfil selecionado corresponde ao perfil cadastrado
-        if (!usuario.getRole().equals(request.getRole())) {
-            throw new BusinessException(
-                    "Perfil selecionado não corresponde ao perfil cadastrado para este usuário.");
+        Usuario usuario = usuarioOpt.get();
+        
+        if (!passwordEncoder.matches(loginRequest.getPassword(), usuario.getSenha())) {
+            throw new RuntimeException("Senha inválida.");
+        }
+        
+        if (!usuario.getRole().equals(loginRequest.getSelectedProfile())) {
+            throw new RuntimeException("Acesso negado: Seu perfil é " + usuario.getRole());
         }
 
-        if (!usuario.isAtivo()) {
-            throw new BusinessException("Usuário inativo. Contate o administrador.");
-        }
-
-        UserPrincipal principal = UserPrincipal.create(usuario);
-        String token = tokenProvider.generateToken(principal);
-
-        return AuthResponse.builder()
-                .token(token)
-                .user(AuthResponse.UserResponse.builder()
-                        .id(usuario.getId())
-                        .nome(usuario.getNome())
-                        .sobrenome(usuario.getSobrenome())
-                        .email(usuario.getEmail())
-                        .role(usuario.getRole())
-                        .unidade(usuario.getUnidade())
-                        .build())
-                .build();
+        String token = tokenProvider.generateToken(usuario.getId(), usuario.getRole());
+        return new AuthResponse(token, usuario.getId(), usuario.getRole(), usuario.getNome(), usuario.getSobrenome(), usuario.getUnidade(), usuario.getEmail());
     }
 
-    public UserResponse register(RegisterRequest request) {
-        if (usuarioRepository.existsByEmail(request.getEmail())) {
-            throw new BusinessException("E-mail já cadastrado: " + request.getEmail());
+    public void registerUser(RegisterRequest registerRequest) {
+        if (usuarioRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
+            throw new RuntimeException("E-mail já está em uso.");
         }
 
-        Usuario usuario = Usuario.builder()
-                .nome(request.getNome())
-                .sobrenome(request.getSobrenome())
-                .email(request.getEmail())
-                .senha(passwordEncoder.encode(request.getPassword()))
-                .unidade(request.getUnidade())
-                .role(request.getRole() != null ? request.getRole() : Role.OPERADOR)
-                .build();
+        Usuario usuario = new Usuario();
+        usuario.setEmail(registerRequest.getEmail());
+        usuario.setSenha(passwordEncoder.encode(registerRequest.getPassword()));
+        usuario.setNome(registerRequest.getNome());
+        usuario.setSobrenome(registerRequest.getSobrenome());
+        usuario.setUnidade(registerRequest.getUnidade());
+        usuario.setRole(registerRequest.getRole());
 
-        Usuario saved = usuarioRepository.save(usuario);
-        return toUserResponse(saved);
-    }
-
-    public UserResponse getMe(String userId) {
-        Usuario usuario = usuarioRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário", "id", userId));
-        return toUserResponse(usuario);
-    }
-
-    private UserResponse toUserResponse(Usuario u) {
-        return UserResponse.builder()
-                .id(u.getId())
-                .nome(u.getNome())
-                .sobrenome(u.getSobrenome())
-                .email(u.getEmail())
-                .role(u.getRole())
-                .unidade(u.getUnidade())
-                .ativo(u.isAtivo())
-                .dataCriacao(u.getDataCriacao())
-                .build();
+        usuarioRepository.save(usuario);
     }
 }

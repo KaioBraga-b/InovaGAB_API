@@ -1,0 +1,14 @@
+server:
+  port: 8080
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/inovagab
+      auto-index-creation: true
+
+api:
+  security:
+    token:
+      secret: ${JWT_SECRET:my-secret-key-for-jwt-generation-which-should-be-very-long-and-secure}
+
