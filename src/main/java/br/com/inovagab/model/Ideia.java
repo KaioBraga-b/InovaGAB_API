@@ -5,6 +5,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.util.List;
+import java.util.ArrayList;
 
 @Data
 @NoArgsConstructor
@@ -33,4 +35,6 @@ public class Ideia {
     private Integer prioridadeBg;
     private String estrategiaId;
     private String estrategiaTitulo;
+    
+    private List<Comentario> comentarios = new ArrayList<>();
 }

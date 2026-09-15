@@ -3,6 +3,7 @@ package br.com.inovagab.controller;
 import br.com.inovagab.model.Estrategia;
 import br.com.inovagab.model.Ideia;
 import br.com.inovagab.model.Projeto;
+import br.com.inovagab.model.Comentario;
 import br.com.inovagab.service.InovacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -84,6 +85,16 @@ public class InovacaoController {
     public ResponseEntity<Void> deleteIdeia(@PathVariable String id) {
         inovacaoService.deleteIdeia(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/ideias/{id}/votar")
+    public ResponseEntity<Ideia> votarIdeia(@PathVariable String id) {
+        return ResponseEntity.ok(inovacaoService.votarIdeia(id));
+    }
+
+    @PostMapping("/ideias/{id}/comentar")
+    public ResponseEntity<Ideia> comentarIdeia(@PathVariable String id, @RequestBody Comentario comentario) {
+        return ResponseEntity.ok(inovacaoService.comentarIdeia(id, comentario));
     }
 
     // Dashboard

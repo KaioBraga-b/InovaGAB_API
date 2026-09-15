@@ -22,4 +22,7 @@ public class Estrategia {
     private String dataCriacao;
     private String categoria;
     private String campanha;
+    private String dataVigencia;
+    private String orientacoes;
 }
+

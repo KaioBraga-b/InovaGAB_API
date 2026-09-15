@@ -3,9 +3,12 @@ package br.com.inovagab.service;
 import br.com.inovagab.model.Estrategia;
 import br.com.inovagab.model.Ideia;
 import br.com.inovagab.model.Projeto;
+import br.com.inovagab.model.Notificacao;
+import br.com.inovagab.model.Comentario;
 import br.com.inovagab.repository.EstrategiaRepository;
 import br.com.inovagab.repository.IdeiaRepository;
 import br.com.inovagab.repository.ProjetoRepository;
+import br.com.inovagab.repository.NotificacaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +25,9 @@ public class InovacaoService {
     
     @Autowired
     private IdeiaRepository ideiaRepository;
+
+    @Autowired
+    private NotificacaoRepository notificacaoRepository;
 
     public List<Projeto> getAllProjetos() {
         return projetoRepository.findAll();
@@ -50,6 +56,9 @@ public class InovacaoService {
             if(projetoUpdates.getLucroObtido() != null) p.setLucroObtido(projetoUpdates.getLucroObtido());
             if(projetoUpdates.getAumentoProdutividade() != null) p.setAumentoProdutividade(projetoUpdates.getAumentoProdutividade());
             if(projetoUpdates.getNoPrazo() != null) p.setNoPrazo(projetoUpdates.getNoPrazo());
+            if(projetoUpdates.getDataInicio() != null) p.setDataInicio(projetoUpdates.getDataInicio());
+            if(projetoUpdates.getPrazo() != null) p.setPrazo(projetoUpdates.getPrazo());
+            if(projetoUpdates.getTarefas() != null) p.setTarefas(projetoUpdates.getTarefas());
 
             return projetoRepository.save(p);
         }).orElseThrow(() -> new RuntimeException("Projeto no encontrado"));
@@ -94,7 +103,18 @@ public class InovacaoService {
     }
 
     public Ideia addIdeia(Ideia ideia) {
-        return ideiaRepository.save(ideia);
+        Ideia savedIdeia = ideiaRepository.save(ideia);
+        
+        Notificacao notifAll = new Notificacao();
+        notifAll.setMensagem("Nova ideia registrada: " + savedIdeia.getTitulo());
+        notifAll.setDestinatarioRole("TODOS");
+        notifAll.setTipo("NOVA_IDEIA");
+        notifAll.setLida(false);
+        notifAll.setIdeiaId(savedIdeia.getId());
+        notifAll.setDataCriacao(java.time.LocalDateTime.now());
+        notificacaoRepository.save(notifAll);
+
+        return savedIdeia;
     }
 
     public Ideia updateIdeia(String id, Ideia ideiaUpdates) {
@@ -113,6 +133,22 @@ public class InovacaoService {
 
     public void deleteIdeia(String id) {
         ideiaRepository.deleteById(id);
+    }
+
+    public Ideia votarIdeia(String id) {
+        return ideiaRepository.findById(id).map(i -> {
+            i.setVotos(i.getVotos() != null ? i.getVotos() + 1 : 1);
+            return ideiaRepository.save(i);
+        }).orElseThrow(() -> new RuntimeException("Ideia não encontrada"));
+    }
+
+    public Ideia comentarIdeia(String id, Comentario comentario) {
+        return ideiaRepository.findById(id).map(i -> {
+            if (i.getComentarios() == null) i.setComentarios(new java.util.ArrayList<>());
+            if (comentario.getDataHora() == null) comentario.setDataHora(java.time.LocalDateTime.now());
+            i.getComentarios().add(comentario);
+            return ideiaRepository.save(i);
+        }).orElseThrow(() -> new RuntimeException("Ideia não encontrada"));
     }
 
     public br.com.inovagab.dto.response.DashboardResumoResponse getDashboardResumo() {
