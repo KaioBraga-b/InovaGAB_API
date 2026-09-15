@@ -5,10 +5,12 @@ import br.com.inovagab.model.Ideia;
 import br.com.inovagab.model.Projeto;
 import br.com.inovagab.model.Notificacao;
 import br.com.inovagab.model.Comentario;
+import br.com.inovagab.model.TransacaoFinanceira;
 import br.com.inovagab.repository.EstrategiaRepository;
 import br.com.inovagab.repository.IdeiaRepository;
 import br.com.inovagab.repository.ProjetoRepository;
 import br.com.inovagab.repository.NotificacaoRepository;
+import br.com.inovagab.repository.TransacaoFinanceiraRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,9 @@ public class InovacaoService {
 
     @Autowired
     private NotificacaoRepository notificacaoRepository;
+
+    @Autowired
+    private TransacaoFinanceiraRepository transacaoFinanceiraRepository;
 
     public List<Projeto> getAllProjetos() {
         return projetoRepository.findAll();
@@ -60,8 +65,13 @@ public class InovacaoService {
             if(projetoUpdates.getPrazo() != null) p.setPrazo(projetoUpdates.getPrazo());
             if(projetoUpdates.getTarefas() != null) p.setTarefas(projetoUpdates.getTarefas());
 
+            if(projetoUpdates.getValorMensal() != null) p.setValorMensal(projetoUpdates.getValorMensal());
+            if(projetoUpdates.getRoi() != null) p.setRoi(projetoUpdates.getRoi());
+            if(projetoUpdates.getDuracao() != null) p.setDuracao(projetoUpdates.getDuracao());
+            if(projetoUpdates.getResultadosAlcancados() != null) p.setResultadosAlcancados(projetoUpdates.getResultadosAlcancados());
+
             return projetoRepository.save(p);
-        }).orElseThrow(() -> new RuntimeException("Projeto no encontrado"));
+        }).orElseThrow(() -> new RuntimeException("Projeto nao encontrado"));
     }
 
     public void deleteProjeto(String id) {
@@ -90,7 +100,7 @@ public class InovacaoService {
             if(estrategiaUpdates.getCampanha() != null) e.setCampanha(estrategiaUpdates.getCampanha());
 
             return estrategiaRepository.save(e);
-        }).orElseThrow(() -> new RuntimeException("Estrategia no encontrada"));
+        }).orElseThrow(() -> new RuntimeException("Estrategia nao encontrada"));
     }
 
     public void deleteEstrategia(String id) {
@@ -128,7 +138,7 @@ public class InovacaoService {
             if(ideiaUpdates.getEtapa() != null) i.setEtapa(ideiaUpdates.getEtapa());
             if(ideiaUpdates.getProgresso() != null) i.setProgresso(ideiaUpdates.getProgresso());
             return ideiaRepository.save(i);
-        }).orElseThrow(() -> new RuntimeException("Ideia no encontrada"));
+        }).orElseThrow(() -> new RuntimeException("Ideia nao encontrada"));
     }
 
     public void deleteIdeia(String id) {
@@ -137,9 +147,13 @@ public class InovacaoService {
 
     public Ideia votarIdeia(String id) {
         return ideiaRepository.findById(id).map(i -> {
+            String status = i.getStatus() != null ? i.getStatus().trim().toUpperCase() : "";
+            if (status.contains("APROVAD") || status.contains("RECUSAD")) {
+                throw new IllegalStateException("Ideias com status Aprovada ou Recusada não podem mais receber votos.");
+            }
             i.setVotos(i.getVotos() != null ? i.getVotos() + 1 : 1);
             return ideiaRepository.save(i);
-        }).orElseThrow(() -> new RuntimeException("Ideia não encontrada"));
+        }).orElseThrow(() -> new RuntimeException("Ideia nao encontrada"));
     }
 
     public Ideia comentarIdeia(String id, Comentario comentario) {
@@ -148,7 +162,128 @@ public class InovacaoService {
             if (comentario.getDataHora() == null) comentario.setDataHora(java.time.LocalDateTime.now());
             i.getComentarios().add(comentario);
             return ideiaRepository.save(i);
-        }).orElseThrow(() -> new RuntimeException("Ideia não encontrada"));
+        }).orElseThrow(() -> new RuntimeException("Ideia nao encontrada"));
+    }
+
+    // Transacoes Financeiras (Receitas e Despesas)
+    public List<TransacaoFinanceira> getTransacoes(String projetoId, String tipo) {
+        if (projetoId != null && !projetoId.isEmpty() && tipo != null && !tipo.isEmpty()) {
+            return transacaoFinanceiraRepository.findByProjetoIdAndTipoOrderByDataHoraDesc(projetoId, tipo.toUpperCase());
+        } else if (projetoId != null && !projetoId.isEmpty()) {
+            return transacaoFinanceiraRepository.findByProjetoIdOrderByDataHoraDesc(projetoId);
+        } else if (tipo != null && !tipo.isEmpty()) {
+            return transacaoFinanceiraRepository.findByTipoOrderByDataHoraDesc(tipo.toUpperCase());
+        }
+        return transacaoFinanceiraRepository.findAllByOrderByDataHoraDesc();
+    }
+
+    public List<TransacaoFinanceira> getReceitas(String projetoId) {
+        return getTransacoes(projetoId, "RECEITA");
+    }
+
+    public List<TransacaoFinanceira> getDespesas(String projetoId) {
+        return getTransacoes(projetoId, "DESPESA");
+    }
+
+    public TransacaoFinanceira addTransacao(TransacaoFinanceira transacao) {
+        if (transacao.getId() != null && transacao.getId().isEmpty()) {
+            transacao.setId(null);
+        }
+        if (transacao.getDataHora() == null || transacao.getDataHora().isEmpty()) {
+            transacao.setDataHora(java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+        }
+        TransacaoFinanceira saved = transacaoFinanceiraRepository.save(transacao);
+
+        // Se houver projeto vinculado, atualizar metricas e gerar notificacao
+        if (transacao.getProjetoId() != null && !transacao.getProjetoId().isEmpty()) {
+            projetoRepository.findById(transacao.getProjetoId()).ifPresent(proj -> {
+                boolean isReceita = "RECEITA".equalsIgnoreCase(transacao.getTipo());
+                if (isReceita) {
+                    double novoLucro = (proj.getLucroObtido() != null ? proj.getLucroObtido() : 0.0) + (transacao.getValor() != null ? transacao.getValor() : 0.0);
+                    proj.setLucroObtido(novoLucro);
+                    projetoRepository.save(proj);
+                } else {
+                    double invAtual = parseInvestimentoValue(proj);
+                    double novoInv = invAtual + (transacao.getValor() != null ? transacao.getValor() : 0.0);
+                    proj.setInvestimento(String.format(java.util.Locale.forLanguageTag("pt-BR"), "R$ %,.2f", novoInv));
+                    projetoRepository.save(proj);
+                }
+                
+                Notificacao notif = new Notificacao();
+                String prefix = isReceita ? "Receita" : "Despesa";
+                notif.setMensagem(prefix + " de R$ " + String.format(java.util.Locale.forLanguageTag("pt-BR"), "%,.2f", transacao.getValor()) + " registrada no projeto \"" + proj.getTitulo() + "\"");
+                notif.setDestinatarioRole("GESTOR");
+                notif.setTipo("FINANCEIRO");
+                notif.setLida(false);
+                notif.setDataCriacao(java.time.LocalDateTime.now());
+                notificacaoRepository.save(notif);
+            });
+        }
+        return saved;
+    }
+
+    public TransacaoFinanceira addReceita(TransacaoFinanceira transacao) {
+        transacao.setTipo("RECEITA");
+        return addTransacao(transacao);
+    }
+
+    public TransacaoFinanceira addDespesa(TransacaoFinanceira transacao) {
+        transacao.setTipo("DESPESA");
+        return addTransacao(transacao);
+    }
+
+    public void deleteTransacao(String id) {
+        transacaoFinanceiraRepository.findById(id).ifPresent(t -> {
+            if (t.getProjetoId() != null && !t.getProjetoId().isEmpty()) {
+                projetoRepository.findById(t.getProjetoId()).ifPresent(proj -> {
+                    if ("RECEITA".equalsIgnoreCase(t.getTipo())) {
+                        double atual = proj.getLucroObtido() != null ? proj.getLucroObtido() : 0.0;
+                        proj.setLucroObtido(Math.max(0.0, atual - (t.getValor() != null ? t.getValor() : 0.0)));
+                        projetoRepository.save(proj);
+                    } else if ("DESPESA".equalsIgnoreCase(t.getTipo())) {
+                        double invAtual = parseInvestimentoValue(proj);
+                        double novoInv = Math.max(0.0, invAtual - (t.getValor() != null ? t.getValor() : 0.0));
+                        proj.setInvestimento(String.format(java.util.Locale.forLanguageTag("pt-BR"), "R$ %,.2f", novoInv));
+                        projetoRepository.save(proj);
+                    }
+                });
+            }
+        });
+        transacaoFinanceiraRepository.deleteById(id);
+    }
+
+    public double parseInvestimentoValue(Projeto p) {
+        if (p == null) return 0.0;
+        if (p.getValorMensal() != null && p.getValorMensal() > 0) {
+            double meses = 1.0;
+            if (p.getDuracao() != null) {
+                String dDigits = p.getDuracao().replaceAll("[^\\d]", "");
+                if (!dDigits.isEmpty()) {
+                    try {
+                        meses = Double.parseDouble(dDigits);
+                    } catch (Exception e) {}
+                }
+            }
+            return p.getValorMensal() * meses;
+        }
+        if (p.getInvestimento() != null && !p.getInvestimento().trim().isEmpty()) {
+            String clean = p.getInvestimento()
+                    .replace("R$", "")
+                    .replace("/mês", "")
+                    .replace("/mes", "")
+                    .trim();
+            String numStr = clean.replaceAll("[^0-9,.]", "");
+            try {
+                if (numStr.contains(",") && numStr.contains(".")) {
+                    return Double.parseDouble(numStr.replace(".", "").replace(",", "."));
+                } else if (numStr.contains(",")) {
+                    return Double.parseDouble(numStr.replace(",", "."));
+                } else if (!numStr.isEmpty()) {
+                    return Double.parseDouble(numStr);
+                }
+            } catch (Exception e) {}
+        }
+        return 0.0;
     }
 
     public br.com.inovagab.dto.response.DashboardResumoResponse getDashboardResumo() {
@@ -164,7 +299,7 @@ public class InovacaoService {
         java.util.Map<String, br.com.inovagab.dto.response.DashboardResumoResponse.RetornoPorEstrategia> mapaRetornos = new java.util.HashMap<>();
 
         for (Projeto p : projetos) {
-            if (!"Concludo".equalsIgnoreCase(p.getStatus())) {
+            if (!"Concluido".equalsIgnoreCase(p.getStatus())) {
                 projetosAtivos++;
             }
             if (p.getNoPrazo() != null && p.getNoPrazo()) {
@@ -177,17 +312,12 @@ public class InovacaoService {
                 somaProdutividade += p.getAumentoProdutividade();
             }
             
-            double invProj = 0.0;
-            if (p.getInvestimento() != null) {
-                try {
-                    invProj = Double.parseDouble(p.getInvestimento().replaceAll("[^\\d.]", ""));
-                } catch (Exception e) {}
-                investimentoTotal += invProj;
-            }
+            double invProj = parseInvestimentoValue(p);
+            investimentoTotal += invProj;
 
             if (p.getEstrategiaId() != null && !p.getEstrategiaId().isEmpty()) {
                 br.com.inovagab.dto.response.DashboardResumoResponse.RetornoPorEstrategia ret = mapaRetornos.getOrDefault(p.getEstrategiaId(), 
-                    new br.com.inovagab.dto.response.DashboardResumoResponse.RetornoPorEstrategia(p.getEstrategiaId(), p.getEstrategiaTitulo() != null ? p.getEstrategiaTitulo() : "Sem Ttulo", 0, 0.0, 0.0, 0.0));
+                    new br.com.inovagab.dto.response.DashboardResumoResponse.RetornoPorEstrategia(p.getEstrategiaId(), p.getEstrategiaTitulo() != null ? p.getEstrategiaTitulo() : "Sem Titulo", 0, 0.0, 0.0, 0.0));
                 
                 ret.setTotalProjetos(ret.getTotalProjetos() + 1);
                 ret.setInvestimentoTotal(ret.getInvestimentoTotal() + invProj);
@@ -201,9 +331,23 @@ public class InovacaoService {
             }
         }
 
+        // Incluir transacoes financeiras avulsas (sem projeto vinculado) para somar no dashboard geral
+        List<TransacaoFinanceira> transacoesAvulsas = transacaoFinanceiraRepository.findAll();
+        for (TransacaoFinanceira t : transacoesAvulsas) {
+            if (t.getProjetoId() == null || t.getProjetoId().trim().isEmpty()) {
+                if ("DESPESA".equalsIgnoreCase(t.getTipo()) && t.getValor() != null) {
+                    investimentoTotal += t.getValor();
+                } else if ("RECEITA".equalsIgnoreCase(t.getTipo()) && t.getValor() != null) {
+                    lucroTotal += t.getValor();
+                }
+            }
+        }
+
         double roiTotal = 0.0;
         if (investimentoTotal > 0) {
             roiTotal = ((lucroTotal - investimentoTotal) / investimentoTotal) * 100;
+        } else if (lucroTotal > 0) {
+            roiTotal = 100.0;
         }
 
         double aumentoMedio = projetos.size() > 0 ? somaProdutividade / projetos.size() : 0.0;

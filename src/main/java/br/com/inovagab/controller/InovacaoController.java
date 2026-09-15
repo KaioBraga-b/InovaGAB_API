@@ -4,6 +4,7 @@ import br.com.inovagab.model.Estrategia;
 import br.com.inovagab.model.Ideia;
 import br.com.inovagab.model.Projeto;
 import br.com.inovagab.model.Comentario;
+import br.com.inovagab.model.TransacaoFinanceira;
 import br.com.inovagab.service.InovacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -95,6 +96,47 @@ public class InovacaoController {
     @PostMapping("/ideias/{id}/comentar")
     public ResponseEntity<Ideia> comentarIdeia(@PathVariable String id, @RequestBody Comentario comentario) {
         return ResponseEntity.ok(inovacaoService.comentarIdeia(id, comentario));
+    }
+
+    // Transacoes Financeiras (Receitas e Despesas)
+    @GetMapping("/transacoes")
+    public ResponseEntity<List<TransacaoFinanceira>> getTransacoes(
+            @RequestParam(required = false) String projetoId,
+            @RequestParam(required = false) String tipo) {
+        return ResponseEntity.ok(inovacaoService.getTransacoes(projetoId, tipo));
+    }
+
+    @PostMapping("/transacoes")
+    public ResponseEntity<TransacaoFinanceira> addTransacao(@RequestBody TransacaoFinanceira transacao) {
+        return ResponseEntity.ok(inovacaoService.addTransacao(transacao));
+    }
+
+    @GetMapping("/receitas")
+    public ResponseEntity<List<TransacaoFinanceira>> getReceitas(
+            @RequestParam(required = false) String projetoId) {
+        return ResponseEntity.ok(inovacaoService.getReceitas(projetoId));
+    }
+
+    @PostMapping("/receitas")
+    public ResponseEntity<TransacaoFinanceira> addReceita(@RequestBody TransacaoFinanceira receita) {
+        return ResponseEntity.ok(inovacaoService.addReceita(receita));
+    }
+
+    @GetMapping("/despesas")
+    public ResponseEntity<List<TransacaoFinanceira>> getDespesas(
+            @RequestParam(required = false) String projetoId) {
+        return ResponseEntity.ok(inovacaoService.getDespesas(projetoId));
+    }
+
+    @PostMapping("/despesas")
+    public ResponseEntity<TransacaoFinanceira> addDespesa(@RequestBody TransacaoFinanceira despesa) {
+        return ResponseEntity.ok(inovacaoService.addDespesa(despesa));
+    }
+
+    @DeleteMapping("/transacoes/{id}")
+    public ResponseEntity<Void> deleteTransacao(@PathVariable String id) {
+        inovacaoService.deleteTransacao(id);
+        return ResponseEntity.ok().build();
     }
 
     // Dashboard
