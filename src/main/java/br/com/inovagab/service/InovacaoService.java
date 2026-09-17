@@ -189,6 +189,11 @@ public class InovacaoService {
 
     public List<Ideia> getAllIdeias(String groupId, String userId, boolean isGestor) {
         if (isGestor) {
+            if (groupId != null && !groupId.isBlank()) {
+                return ideiaRepository.findAll().stream()
+                        .filter(i -> groupId.equals(i.getGroupId()) || (userId != null && userId.equals(i.getUserId())))
+                        .collect(java.util.stream.Collectors.toList());
+            }
             return ideiaRepository.findAll();
         }
 
@@ -196,10 +201,11 @@ public class InovacaoService {
         List<Ideia> permitidas = new java.util.ArrayList<>();
         for (Ideia i : todas) {
             boolean isMinha = (userId != null && !userId.isBlank() && userId.equals(i.getUserId()));
-            boolean isSemGrupo = (i.getGroupId() == null || i.getGroupId().isBlank());
             boolean isDoMesmoGrupo = (groupId != null && !groupId.isBlank() && groupId.equals(i.getGroupId()));
 
-            if (isMinha || isSemGrupo || isDoMesmoGrupo) {
+            // Ideia pessoal: apenas o autor visualiza.
+            // Ideia do grupo: visivel para quem pertence ao mesmo grupo.
+            if (isMinha || isDoMesmoGrupo) {
                 permitidas.add(i);
             }
         }

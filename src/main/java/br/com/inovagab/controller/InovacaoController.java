@@ -96,14 +96,20 @@ public class InovacaoController {
     @GetMapping("/ideias")
     public ResponseEntity<List<Ideia>> getAllIdeias() {
         String groupId = securityUtils.getCurrentUserGroupId().orElse(null);
-        return ResponseEntity.ok(inovacaoService.getAllIdeias(groupId));
+        String userId = securityUtils.getCurrentUserId().orElse(null);
+        boolean isGestor = securityUtils.isGestor();
+        return ResponseEntity.ok(inovacaoService.getAllIdeias(groupId, userId, isGestor));
     }
 
     @PostMapping("/ideias")
     public ResponseEntity<Ideia> addIdeia(@RequestBody Ideia ideia) {
         if (ideia.getId() != null && ideia.getId().isEmpty()) ideia.setId(null);
         String groupId = securityUtils.getCurrentUserGroupId().orElse(null);
-        return ResponseEntity.ok(inovacaoService.addIdeia(ideia, groupId));
+        String userId = securityUtils.getCurrentUserId().orElse(null);
+        String userName = securityUtils.getCurrentUser()
+                .map(u -> (u.getNome() != null ? u.getNome() : "") + (u.getSobrenome() != null ? " " + u.getSobrenome() : ""))
+                .orElse(null);
+        return ResponseEntity.ok(inovacaoService.addIdeia(ideia, groupId, userId, userName));
     }
 
     @PutMapping("/ideias/{id}")
