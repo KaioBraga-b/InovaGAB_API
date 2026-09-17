@@ -35,4 +35,19 @@ public class AuthController {
             return ResponseEntity.badRequest().body(java.util.Collections.singletonMap("error", e.getMessage()));
         }
     }
+
+    @Autowired
+    private br.com.inovagab.security.SecurityUtils securityUtils;
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getMe() {
+        try {
+            String userId = securityUtils.getCurrentUserId()
+                    .orElseThrow(() -> new RuntimeException("Usuário não autenticado."));
+            var profile = authService.getCurrentUserProfile(userId);
+            return ResponseEntity.ok(profile);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(java.util.Collections.singletonMap("error", e.getMessage()));
+        }
+    }
 }

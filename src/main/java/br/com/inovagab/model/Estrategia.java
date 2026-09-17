@@ -24,5 +24,6 @@ public class Estrategia {
     private String campanha;
     private String dataVigencia;
     private String orientacoes;
+    private String groupId;
 }
 

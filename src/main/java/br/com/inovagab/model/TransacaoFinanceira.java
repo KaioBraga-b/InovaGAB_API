@@ -35,4 +35,5 @@ public class TransacaoFinanceira {
     private String dataHora;
 
     private String responsavel;
+    private String groupId;
 }

@@ -22,4 +22,5 @@ public class UserResponse {
     private String unidade;
     private boolean ativo;
     private Instant dataCriacao;
+    private String groupId;
 }

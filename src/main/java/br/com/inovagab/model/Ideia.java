@@ -37,4 +37,5 @@ public class Ideia {
     private String estrategiaTitulo;
     
     private List<Comentario> comentarios = new ArrayList<>();
+    private String groupId;
 }

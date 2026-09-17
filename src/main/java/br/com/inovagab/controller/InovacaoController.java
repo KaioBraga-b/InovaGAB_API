@@ -19,62 +19,91 @@ public class InovacaoController {
     @Autowired
     private InovacaoService inovacaoService;
 
+    @Autowired
+    private br.com.inovagab.security.SecurityUtils securityUtils;
+
     // Projetos
     @GetMapping("/projetos")
     public ResponseEntity<List<Projeto>> getAllProjetos() {
-        return ResponseEntity.ok(inovacaoService.getAllProjetos());
+        String groupId = securityUtils.getCurrentUserGroupId().orElse(null);
+        return ResponseEntity.ok(inovacaoService.getAllProjetos(groupId));
     }
 
     @PostMapping("/projetos")
     public ResponseEntity<Projeto> addProjeto(@RequestBody Projeto projeto) {
         if (projeto.getId() != null && projeto.getId().isEmpty()) projeto.setId(null);
-        return ResponseEntity.ok(inovacaoService.addProjeto(projeto));
+        String groupId = securityUtils.getCurrentUserGroupId().orElse(null);
+        return ResponseEntity.ok(inovacaoService.addProjeto(projeto, groupId));
     }
 
     @PutMapping("/projetos/{id}")
-    public ResponseEntity<Projeto> updateProjeto(@PathVariable String id, @RequestBody Projeto projeto) {
-        return ResponseEntity.ok(inovacaoService.updateProjeto(id, projeto));
+    public ResponseEntity<?> updateProjeto(@PathVariable String id, @RequestBody Projeto projeto) {
+        try {
+            String groupId = securityUtils.getCurrentUserGroupId().orElse(null);
+            return ResponseEntity.ok(inovacaoService.updateProjeto(id, projeto, groupId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(java.util.Collections.singletonMap("error", e.getMessage()));
+        }
     }
 
     @DeleteMapping("/projetos/{id}")
-    public ResponseEntity<Void> deleteProjeto(@PathVariable String id) {
-        inovacaoService.deleteProjeto(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> deleteProjeto(@PathVariable String id) {
+        try {
+            String groupId = securityUtils.getCurrentUserGroupId().orElse(null);
+            inovacaoService.deleteProjeto(id, groupId);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(java.util.Collections.singletonMap("error", e.getMessage()));
+        }
     }
 
     // Estrategias
     @GetMapping("/estrategias")
     public ResponseEntity<List<Estrategia>> getAllEstrategias() {
-        return ResponseEntity.ok(inovacaoService.getAllEstrategias());
+        String groupId = securityUtils.getCurrentUserGroupId().orElse(null);
+        return ResponseEntity.ok(inovacaoService.getAllEstrategias(groupId));
     }
 
     @PostMapping("/estrategias")
     public ResponseEntity<Estrategia> addEstrategia(@RequestBody Estrategia estrategia) {
         if (estrategia.getId() != null && estrategia.getId().isEmpty()) estrategia.setId(null);
-        return ResponseEntity.ok(inovacaoService.addEstrategia(estrategia));
+        String groupId = securityUtils.getCurrentUserGroupId().orElse(null);
+        return ResponseEntity.ok(inovacaoService.addEstrategia(estrategia, groupId));
     }
 
     @PutMapping("/estrategias/{id}")
-    public ResponseEntity<Estrategia> updateEstrategia(@PathVariable String id, @RequestBody Estrategia estrategia) {
-        return ResponseEntity.ok(inovacaoService.updateEstrategia(id, estrategia));
+    public ResponseEntity<?> updateEstrategia(@PathVariable String id, @RequestBody Estrategia estrategia) {
+        try {
+            String groupId = securityUtils.getCurrentUserGroupId().orElse(null);
+            return ResponseEntity.ok(inovacaoService.updateEstrategia(id, estrategia, groupId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(java.util.Collections.singletonMap("error", e.getMessage()));
+        }
     }
 
     @DeleteMapping("/estrategias/{id}")
-    public ResponseEntity<Void> deleteEstrategia(@PathVariable String id) {
-        inovacaoService.deleteEstrategia(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> deleteEstrategia(@PathVariable String id) {
+        try {
+            String groupId = securityUtils.getCurrentUserGroupId().orElse(null);
+            inovacaoService.deleteEstrategia(id, groupId);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(java.util.Collections.singletonMap("error", e.getMessage()));
+        }
     }
 
     // Ideias
     @GetMapping("/ideias")
     public ResponseEntity<List<Ideia>> getAllIdeias() {
-        return ResponseEntity.ok(inovacaoService.getAllIdeias());
+        String groupId = securityUtils.getCurrentUserGroupId().orElse(null);
+        return ResponseEntity.ok(inovacaoService.getAllIdeias(groupId));
     }
 
     @PostMapping("/ideias")
     public ResponseEntity<Ideia> addIdeia(@RequestBody Ideia ideia) {
         if (ideia.getId() != null && ideia.getId().isEmpty()) ideia.setId(null);
-        return ResponseEntity.ok(inovacaoService.addIdeia(ideia));
+        String groupId = securityUtils.getCurrentUserGroupId().orElse(null);
+        return ResponseEntity.ok(inovacaoService.addIdeia(ideia, groupId));
     }
 
     @PutMapping("/ideias/{id}")
@@ -142,6 +171,7 @@ public class InovacaoController {
     // Dashboard
     @GetMapping("/dashboard")
     public ResponseEntity<br.com.inovagab.dto.response.DashboardResumoResponse> getDashboardResumo() {
-        return ResponseEntity.ok(inovacaoService.getDashboardResumo());
+        String groupId = securityUtils.getCurrentUserGroupId().orElse(null);
+        return ResponseEntity.ok(inovacaoService.getDashboardResumo(groupId));
     }
 }

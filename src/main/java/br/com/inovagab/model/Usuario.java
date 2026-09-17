@@ -19,4 +19,5 @@ public class Usuario {
     private String sobrenome;
     private String unidade;
     private String role;
+    private String groupId;
 }

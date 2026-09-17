@@ -24,13 +24,21 @@ public class JwtTokenProvider {
     }
 
     public String generateToken(String userId, String role) {
-        return Jwts.builder()
+        return generateToken(userId, role, null);
+    }
+
+    public String generateToken(String userId, String role, String groupId) {
+        var builder = Jwts.builder()
                 .subject(userId)
                 .claim("role", role)
                 .issuedAt(new Date())
-                .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
-                .signWith(getSigningKey())
-                .compact();
+                .expiration(new Date((new Date()).getTime() + jwtExpirationMs));
+
+        if (groupId != null && !groupId.isBlank()) {
+            builder.claim("groupId", groupId);
+        }
+
+        return builder.signWith(getSigningKey()).compact();
     }
 
     public String getUserIdFromJwt(String token) {
@@ -49,6 +57,15 @@ public class JwtTokenProvider {
                 .parseSignedClaims(token)
                 .getPayload()
                 .get("role", String.class);
+    }
+
+    public String getGroupIdFromJwt(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("groupId", String.class);
     }
 
     public boolean validateToken(String authToken) {

@@ -41,5 +41,6 @@ public class Projeto {
     private String dataInicio;
     private String prazo;
     private List<ChecklistItem> tarefas = new ArrayList<>();
+    private String groupId;
 }
 
