@@ -1,4 +1,4 @@
-package br.com.inovagab.service;
+﻿package br.com.inovagab.service;
 
 import br.com.inovagab.model.Estrategia;
 import br.com.inovagab.model.Ideia;
@@ -180,48 +180,103 @@ public class InovacaoService {
 
     // Ideia
     public List<Ideia> getAllIdeias() {
-        return getAllIdeias(null);
+        return getAllIdeias(null, null, true);
     }
 
     public List<Ideia> getAllIdeias(String groupId) {
-        if (groupId != null && !groupId.isBlank()) {
-            return ideiaRepository.findByGroupId(groupId);
+        return getAllIdeias(groupId, null, false);
+    }
+
+    public List<Ideia> getAllIdeias(String groupId, String userId, boolean isGestor) {
+        if (isGestor) {
+            return ideiaRepository.findAll();
         }
-        return java.util.Collections.emptyList();
+
+        List<Ideia> todas = ideiaRepository.findAll();
+        List<Ideia> permitidas = new java.util.ArrayList<>();
+        for (Ideia i : todas) {
+            boolean isMinha = (userId != null && !userId.isBlank() && userId.equals(i.getUserId()));
+            boolean isSemGrupo = (i.getGroupId() == null || i.getGroupId().isBlank());
+            boolean isDoMesmoGrupo = (groupId != null && !groupId.isBlank() && groupId.equals(i.getGroupId()));
+
+            if (isMinha || isSemGrupo || isDoMesmoGrupo) {
+                permitidas.add(i);
+            }
+        }
+        return permitidas;
     }
 
     public Ideia addIdeia(Ideia ideia) {
-        return addIdeia(ideia, null);
+        return addIdeia(ideia, null, null, null);
     }
 
     public Ideia addIdeia(Ideia ideia, String groupId) {
-        if ((ideia.getGroupId() == null || ideia.getGroupId().isBlank()) && groupId != null && !groupId.isBlank()) {
+        return addIdeia(ideia, groupId, null, null);
+    }
+
+    public Ideia addIdeia(Ideia ideia, String groupId, String userId, String userName) {
+        if (ideia.getId() != null && ideia.getId().isBlank()) {
+            ideia.setId(null);
+        }
+        if (userId != null && !userId.isBlank() && (ideia.getUserId() == null || ideia.getUserId().isBlank())) {
+            ideia.setUserId(userId);
+        }
+        if (userName != null && !userName.isBlank() && (ideia.getAutor() == null || ideia.getAutor().isBlank())) {
+            ideia.setAutor(userName.trim());
+        }
+        if (groupId != null && !groupId.isBlank() && (ideia.getGroupId() == null || ideia.getGroupId().isBlank())) {
             ideia.setGroupId(groupId);
         }
+        if (ideia.getStatus() == null || ideia.getStatus().isBlank()) {
+            ideia.setStatus("Enviada");
+        }
+        if (ideia.getStatusColor() == null) {
+            ideia.setStatusColor(0xFFF3F4F6);
+        }
+        if (ideia.getStatusTextColor() == null) {
+            ideia.setStatusTextColor(0xFF6B7280);
+        }
+        if (ideia.getVotos() == null) {
+            ideia.setVotos(0);
+        }
+        if (ideia.getProgresso() == null) {
+            ideia.setProgresso(0.1);
+        }
+        if (ideia.getEtapa() == null || ideia.getEtapa().isBlank()) {
+            ideia.setEtapa("Aguardando triagem");
+        }
+
         Ideia savedIdeia = ideiaRepository.save(ideia);
-        
-        Notificacao notifAll = new Notificacao();
-        notifAll.setMensagem("Nova ideia registrada: " + savedIdeia.getTitulo());
-        notifAll.setDestinatarioRole("TODOS");
-        notifAll.setTipo("NOVA_IDEIA");
-        notifAll.setLida(false);
-        notifAll.setIdeiaId(savedIdeia.getId());
-        notifAll.setDataCriacao(java.time.LocalDateTime.now());
-        notificacaoRepository.save(notifAll);
+
+        try {
+            Notificacao notifAll = new Notificacao();
+            notifAll.setMensagem("Nova ideia registrada: " + savedIdeia.getTitulo());
+            notifAll.setDestinatarioRole("TODOS");
+            notifAll.setTipo("NOVA_IDEIA");
+            notifAll.setLida(false);
+            notifAll.setIdeiaId(savedIdeia.getId());
+            notifAll.setDataCriacao(java.time.LocalDateTime.now());
+            notificacaoRepository.save(notifAll);
+        } catch (Exception ignored) {}
 
         return savedIdeia;
     }
 
     public Ideia updateIdeia(String id, Ideia ideiaUpdates) {
         return ideiaRepository.findById(id).map(i -> {
-            if(ideiaUpdates.getTitulo() != null) i.setTitulo(ideiaUpdates.getTitulo());
-            if(ideiaUpdates.getDescricao() != null) i.setDescricao(ideiaUpdates.getDescricao());
-            if(ideiaUpdates.getArea() != null) i.setArea(ideiaUpdates.getArea());
-            if(ideiaUpdates.getStatus() != null) i.setStatus(ideiaUpdates.getStatus());
+            if(ideiaUpdates.getTitulo() != null && !ideiaUpdates.getTitulo().isBlank()) i.setTitulo(ideiaUpdates.getTitulo());
+            if(ideiaUpdates.getDescricao() != null && !ideiaUpdates.getDescricao().isBlank()) i.setDescricao(ideiaUpdates.getDescricao());
+            if(ideiaUpdates.getArea() != null && !ideiaUpdates.getArea().isBlank()) i.setArea(ideiaUpdates.getArea());
+            if(ideiaUpdates.getStatus() != null && !ideiaUpdates.getStatus().isBlank()) i.setStatus(ideiaUpdates.getStatus());
             if(ideiaUpdates.getStatusColor() != null) i.setStatusColor(ideiaUpdates.getStatusColor());
             if(ideiaUpdates.getStatusTextColor() != null) i.setStatusTextColor(ideiaUpdates.getStatusTextColor());
-            if(ideiaUpdates.getEtapa() != null) i.setEtapa(ideiaUpdates.getEtapa());
+            if(ideiaUpdates.getEtapa() != null && !ideiaUpdates.getEtapa().isBlank()) i.setEtapa(ideiaUpdates.getEtapa());
             if(ideiaUpdates.getProgresso() != null) i.setProgresso(ideiaUpdates.getProgresso());
+            if(ideiaUpdates.getImpacto() != null && !ideiaUpdates.getImpacto().isBlank()) i.setImpacto(ideiaUpdates.getImpacto());
+            if(ideiaUpdates.getObjetivo() != null && !ideiaUpdates.getObjetivo().isBlank()) i.setObjetivo(ideiaUpdates.getObjetivo());
+            if(ideiaUpdates.getEstrategiaId() != null) i.setEstrategiaId(ideiaUpdates.getEstrategiaId());
+            if(ideiaUpdates.getEstrategiaTitulo() != null) i.setEstrategiaTitulo(ideiaUpdates.getEstrategiaTitulo());
+            if(ideiaUpdates.getGroupId() != null && !ideiaUpdates.getGroupId().isBlank()) i.setGroupId(ideiaUpdates.getGroupId());
             return ideiaRepository.save(i);
         }).orElseThrow(() -> new RuntimeException("Ideia nao encontrada"));
     }

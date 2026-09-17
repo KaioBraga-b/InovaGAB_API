@@ -1,4 +1,4 @@
-package br.com.inovagab.controller;
+﻿package br.com.inovagab.controller;
 
 import br.com.inovagab.model.Estrategia;
 import br.com.inovagab.model.Ideia;
