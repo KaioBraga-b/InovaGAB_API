@@ -24,22 +24,27 @@ env:
 
 jobs:
   deploy:
-    name: Deploy ${{ matrix.environment }} (${{ matrix.ref }})
+    name: Build da imagem e deploy
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref_name == matrix.ref
+    # O contexto `matrix` não é válido em `jobs.<job_id>.if`; a regra
+    # develop->staging / main->producao é resolvida no passo "amb".
+    if: github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'develop')
     permissions:
       contents: read
       packages: write
-    strategy:
-      matrix:
-        include:
-          - ref: develop
-            environment: staging
-          - ref: main
-            environment: production
     steps:
       - name: Checkout do código
         uses: actions/checkout@v5
+
+      - name: Resolver ambiente da branch
+        id: amb
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            ENVIRONMENT=production
+          else
+            ENVIRONMENT=staging
+          fi
+          echo "environment=${ENVIRONMENT}" >> "$GITHUB_OUTPUT"
 
       - name: Definir imagem (SHA do commit)
         id: meta
@@ -76,7 +81,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SERVER_SSH_KEY }}
 
-      - name: Deploy em ${{ matrix.environment }} via SSH + Compose
+      - name: Deploy em ${{ steps.amb.outputs.environment }} via SSH + Compose
         if: ${{ secrets.SERVER_HOST != '' }}
         env:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
@@ -84,7 +89,7 @@ jobs:
           SERVER_PORT: ${{ secrets.SERVER_PORT }}
         run: |
           bash scripts/deploy-remote.sh \
-            "${{ matrix.environment }}" \
+            "${{ steps.amb.outputs.environment }}" \
             "${{ steps.meta.outputs.image_full }}"
 
       # -------------------------------
@@ -93,7 +98,7 @@ jobs:
       - name: Deploy não executado (cadastre os secrets)
         if: ${{ secrets.SERVER_HOST == '' }}
         run: |
-          echo "::warning::Deploy ${{ matrix.environment }} NÃO executado: secrets de servidor ausentes."
+          echo "::warning::Deploy ${{ steps.amb.outputs.environment }} NÃO executado: secrets de servidor ausentes."
           echo "Para ativar, configure no GitHub > Settings > Secrets and variables > Actions:"
           echo "  SERVER_HOST  (ex.: 192.168.0.10)"
           echo "  SERVER_USER  (ex.: root)"
