@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Dotenv / Segredos ###
+.env
+.env.prod
+deploy/*/.env
+*.env.local
+
+### Logs ###
+*.log

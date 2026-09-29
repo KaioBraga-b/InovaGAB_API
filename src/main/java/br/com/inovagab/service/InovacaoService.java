@@ -1,4 +1,4 @@
-﻿package br.com.inovagab.service;
+package br.com.inovagab.service;
 
 import br.com.inovagab.model.Estrategia;
 import br.com.inovagab.model.Ideia;
