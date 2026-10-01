@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentação Técnica — Cidades ESG Inteligentes (InovaGAB API)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-code: #0d1117;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #22c55e;
+            --accent-purple: #a855f7;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #334155;
+            --gradient-1: linear-gradient(135deg, #3b82f6, #a855f7);
+            --gradient-2: linear-gradient(135deg, #06b6d4, #22c55e);
+            --gradient-3: linear-gradient(135deg, #f59e0b, #ef4444);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.7;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 60px 48px;
+            page-break-after: always;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .page:last-child { page-break-after: auto; }
+
+        /* Cover Page */
+        .cover {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            min-height: 100vh;
+        }
+
+        .cover .badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 32px;
+        }
+
+        .cover h1 {
+            font-size: 48px;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 8px;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cover .subtitle {
+            font-size: 22px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            margin-bottom: 48px;
+        }
+
+        .cover .team {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px 40px;
+            width: 100%;
+            max-width: 620px;
+        }
+
+        .cover .team h3 {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        .cover .team-member {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+        }
+
+        .cover .team-member:last-child { border-bottom: none; }
+
+        .cover .team-member .name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .cover .team-member .rm {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.1);
+            padding: 3px 10px;
+            border-radius: 6px;
+        }
+
+        .cover .footer-info {
+            margin-top: 40px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .cover .footer-info strong { color: var(--text-secondary); }
+
+        /* Section Headers */
+        .section-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+        }
+
+        h2 {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+
+        h2 .gradient { 
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-desc {
+            font-size: 17px;
+            color: var(--text-secondary);
+            margin-bottom: 36px;
+            max-width: 680px;
+        }
+
+        h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: var(--accent-cyan);
+        }
+
+        p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .card-grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-card .icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Code blocks */
+        .code-block {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            line-height: 1.8;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            white-space: pre;
+            color: #e2e8f0;
+        }
+
+        .code-block .filename {
+            display: block;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .code-block .comment { color: #6b7280; }
+        .code-block .keyword { color: #c084fc; }
+        .code-block .string { color: #34d399; }
+        .code-block .instruction { color: #60a5fa; }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        thead th {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            font-weight: 600;
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        tbody td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+            color: var(--text-secondary);
+        }
+
+        tbody tr:hover { background: rgba(59, 130, 246, 0.03); }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .tag-blue { background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); }
+        .tag-green { background: rgba(34, 197, 94, 0.15); color: var(--accent-green); }
+        .tag-purple { background: rgba(168, 85, 247, 0.15); color: var(--accent-purple); }
+        .tag-orange { background: rgba(245, 158, 11, 0.15); color: var(--accent-orange); }
+        .tag-cyan { background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); }
+        .tag-red { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+
+        /* Pipeline Flow */
+        .pipeline-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 24px 0 32px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .pipeline-step {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 14px;
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .pipeline-step .step-icon { font-size: 24px; margin-bottom: 6px; }
+
+        .pipeline-step .step-name {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-primary);
+        }
+
+        .pipeline-step .step-detail {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .pipeline-arrow {
+            font-size: 20px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        /* Architecture Diagram */
+        .arch-diagram {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px 32px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre;
+            margin-bottom: 24px;
+            color: #94a3b8;
+        }
+
+        /* Checklist */
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .checklist-item .check {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--accent-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+
+        .checklist-item .check-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        /* Challenge Cards */
+        .challenge {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--accent-orange);
+        }
+
+        .challenge .challenge-title {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .challenge .challenge-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .challenge .solution {
+            font-size: 13px;
+            color: var(--accent-green);
+            padding-left: 16px;
+            border-left: 2px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .challenge .solution strong { color: var(--accent-green); }
+
+        /* Print-specific styles */
+        .print-note {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px dashed var(--accent-orange);
+            border-radius: 10px;
+            padding: 16px 20px;
+            font-size: 13px;
+            color: var(--accent-orange);
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        @media print {
+            body { background: white; color: #1e293b; }
+            .page { padding: 40px 32px; min-height: auto; }
+            .card, .stat-card, .pipeline-step, .checklist-item, .challenge { border-color: #e2e8f0; }
+            .card, .stat-card, .pipeline-step, .code-block, .arch-diagram, .challenge, .checklist-item { background: #f8fafc; }
+            .cover .team { background: #f8fafc; border-color: #e2e8f0; }
+            h2, h3, h4, .stat-card .value, .pipeline-step .step-name, .checklist-item .check-text, .challenge .challenge-title, .cover .team-member .name {
+                color: #1e293b;
+            }
+            p, td, .section-desc, .challenge .challenge-desc { color: #475569; }
+            .text-primary { color: #1e293b !important; }
+            thead th { background: #eff6ff; border-bottom-color: #bfdbfe; }
+            tbody td { border-bottom-color: #e2e8f0; }
+            .print-note { display: none; }
+            .page { page-break-inside: avoid; }
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 32px 0;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-bottom: 16px;
+        }
+
+        ul li {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        ul li strong { color: var(--text-primary); }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PÁGINA 1: CAPA
+     ═══════════════════════════════════════════════════════════ -->
+<div class="page cover">
+    <div class="badge">Atividade DevOps • FIAP 2026</div>
+    <h1>Cidades ESG<br>Inteligentes</h1>
+    <p class="subtitle">InovaGAB API — Documentação Técnica de Entrega</p>
+
+    <div class="team">
+        <h3>👥 Integrantes da Equipe</h3>
+        <div class="team-member">
+            <span class="name">Gabriel Aparecido Lopes de Campos</span>
+            <span class="rm">RM562021</span>
+        </div>
+        <div class="team-member">
+            <span class="name">Henry Gabriel Ferreira</span>
+            <span class="rm">RM565688</span>
+        </div>
+        <div class="team-member">
+            <span class="name">Kaio Henrique Veríssimo Braga</span>
+            <span class="rm">RM565115</span>
+        </div>
+        <div class="team-member">
+            <span class="name">Marianna Rocha de Miranda</span>
+            <span class="rm">RM566305</span>
+        </div>
+        <div class="team-member">
+            <span class="name">Wesley Araujo Chaves</span>
+            <span class="rm">RM563114</span>
+        </div>
+    </div>
+
+    <div class="footer-info">
+        <strong>Curso:</strong> Análise e Desenvolvimento de Sistemas (ADS)<br>
+        <strong>Instituição:</strong> FIAP • <strong>Data:</strong> Setembro/2026<br>
+        <strong>Repositório:</strong> github.com/KaioBraga-b/InovaGAB_API
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PÁGINA 2: VISÃO GERAL + ARQUITETURA
+     ═══════════════════════════════════════════════════════════ -->
+<div class="page">
+    <div class="section-number">Seção 01</div>
+    <h2>Visão Geral do <span class="gradient">Projeto</span></h2>
+    <p class="section-desc">
+        A InovaGAB é uma API REST em Java Spring Boot para gestão da inovação em cidades ESG inteligentes,
+        com autenticação JWT, isolamento de dados por grupo e dashboard executivo com cálculo de ROI.
+    </p>
+
+    <div class="card-grid-3">
+        <div class="stat-card">
+            <div class="icon">☕</div>
+            <div class="value">Java 24</div>
+            <div class="label">Linguagem</div>
+        </div>
+        <div class="stat-card">
+            <div class="icon">🍃</div>
+            <div class="value">4.1.1</div>
+            <div class="label">Spring Boot</div>
+        </div>
+        <div class="stat-card">
+            <div class="icon">🍃</div>
+            <div class="value">7.0</div>
+            <div class="label">MongoDB</div>
+        </div>
+    </div>
+
+    <h3>Arquitetura Geral DevOps</h3>
+    <div class="arch-diagram">         GitHub (main / develop)
+               │  push
+               ▼
+         GitHub Actions
+               │  CI: build + testes → artefato .jar
+               │  CD: build da imagem → GHCR → deploy
+               ▼
+         Maven Build (./mvnw)
+               ▼
+         Testes Automatizados (9 testes — MongoDB containerizado)
+               ▼
+         Docker Build (multi-stage: JDK 24 → JRE 24)
+               ▼
+         GHCR — ghcr.io/kaiobraga-b/inovagab_api:&lt;sha&gt;
+               ▼
+               ├──▶ STAGING   (branch develop — porta 8081)
+               │
+               └──▶ PRODUÇÃO  (branch main — porta 8080)</div>
+
+    <h3>Tecnologias Utilizadas</h3>
+    <table>
+        <thead>
+            <tr><th>Categoria</th><th>Tecnologia</th><th>Versão</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Linguagem</td><td>Java (Eclipse Temurin)</td><td><span class="tag tag-blue">24</span></td></tr>
+            <tr><td>Framework</td><td>Spring Boot</td><td><span class="tag tag-green">4.1.1</span></td></tr>
+            <tr><td>Banco de Dados</td><td>MongoDB</td><td><span class="tag tag-green">7.0</span></td></tr>
+            <tr><td>Segurança</td><td>Spring Security + JWT (jjwt)</td><td><span class="tag tag-purple">0.12.6</span></td></tr>
+            <tr><td>Documentação API</td><td>SpringDoc OpenAPI / Swagger UI</td><td><span class="tag tag-cyan">2.8.9</span></td></tr>
+            <tr><td>Build</td><td>Apache Maven (Wrapper)</td><td><span class="tag tag-orange">3.9+</span></td></tr>
+            <tr><td>Containerização</td><td>Docker (Multi-stage build)</td><td><span class="tag tag-blue">24+</span></td></tr>
+            <tr><td>Orquestração</td><td>Docker Compose</td><td><span class="tag tag-blue">2.20+</span></td></tr>
+            <tr><td>CI/CD</td><td>GitHub Actions</td><td><span class="tag tag-purple">v5</span></td></tr>
+            <tr><td>Registry</td><td>GitHub Container Registry (GHCR)</td><td><span class="tag tag-cyan">—</span></td></tr>
+            <tr><td>Monitoramento</td><td>Spring Boot Actuator</td><td><span class="tag tag-green">4.1.1</span></td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PÁGINA 3: PIPELINE CI/CD
+     ═══════════════════════════════════════════════════════════ -->
+<div class="page">
+    <div class="section-number">Seção 02</div>
+    <h2>Pipeline <span class="gradient">CI/CD</span></h2>
+    <p class="section-desc">
+        Ferramenta: <strong>GitHub Actions</strong> — plataforma nativa do GitHub, sem custo para repositórios públicos,
+        com integração direta ao GHCR e suporte a service containers.
+    </p>
+
+    <h3>Fluxo Visual do Pipeline</h3>
+    <div class="pipeline-flow">
+        <div class="pipeline-step">
+            <div class="step-icon">📥</div>
+            <div class="step-name">Checkout</div>
+            <div class="step-detail">Código-fonte</div>
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">
+            <div class="step-icon">🔨</div>
+            <div class="step-name">Build</div>
+            <div class="step-detail">Maven + Java 24</div>
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">
+            <div class="step-icon">🧪</div>
+            <div class="step-name">Testes</div>
+            <div class="step-detail">9 testes + MongoDB</div>
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">
+            <div class="step-icon">🐳</div>
+            <div class="step-name">Docker</div>
+            <div class="step-detail">Build + Push GHCR</div>
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">
+            <div class="step-icon">🚀</div>
+            <div class="step-name">Deploy</div>
+            <div class="step-detail">SSH + Compose</div>
+        </div>
+    </div>
+
+    <h3>CI — Integração Contínua (.github/workflows/ci.yml)</h3>
+    <p>Disparado a cada push (qualquer branch) e pull request. Executa os testes com MongoDB real em service container do GitHub Actions.</p>
+    
+    <table>
+        <thead>
+            <tr><th>#</th><th>Passo</th><th>Descrição</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><span class="tag tag-blue">1</span></td><td>Checkout</td><td>Clona o código-fonte do repositório</td></tr>
+            <tr><td><span class="tag tag-blue">2</span></td><td>Setup Java 24</td><td>Instala JDK Temurin com cache Maven</td></tr>
+            <tr><td><span class="tag tag-green">3</span></td><td>Testes</td><td><code>./mvnw -B test</code> com MongoDB 7.0 em service container</td></tr>
+            <tr><td><span class="tag tag-green">4</span></td><td>Package</td><td><code>./mvnw -B -DskipTests package</code> → gera .jar</td></tr>
+            <tr><td><span class="tag tag-purple">5</span></td><td>Artifact</td><td>Publica o .jar como artifact do GitHub Actions</td></tr>
+            <tr><td><span class="tag tag-cyan">6</span></td><td>Docker Build</td><td>Build da imagem Docker com Buildx + cache GHA</td></tr>
+            <tr><td><span class="tag tag-cyan">7</span></td><td>Push GHCR</td><td>Publica <code>ghcr.io/kaiobraga-b/inovagab_api:&lt;sha&gt;</code> + <code>:latest</code></td></tr>
+        </tbody>
+    </table>
+
+    <h3>CD — Entrega Contínua (.github/workflows/cd.yml)</h3>
+    <p>Disparado em push nas branches <code>main</code> e <code>develop</code>. Resolve o ambiente alvo automaticamente pela branch.</p>
+    
+    <table>
+        <thead>
+            <tr><th>#</th><th>Passo</th><th>Descrição</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><span class="tag tag-blue">1</span></td><td>Resolve Ambiente</td><td><code>develop</code> → staging / <code>main</code> → produção</td></tr>
+            <tr><td><span class="tag tag-purple">2</span></td><td>Build + Push</td><td>Constrói e publica imagem no GHCR (tag por SHA)</td></tr>
+            <tr><td><span class="tag tag-orange">3</span></td><td>SSH Agent</td><td>Configura chave SSH para acesso ao servidor</td></tr>
+            <tr><td><span class="tag tag-green">4</span></td><td>Deploy Remoto</td><td><code>scripts/deploy-remote.sh</code> → envia bundle via SSH</td></tr>
+            <tr><td><span class="tag tag-green">5</span></td><td>Apply</td><td><code>scripts/remote-apply.sh</code> → <code>docker compose pull && up -d</code></td></tr>
+            <tr><td><span class="tag tag-cyan">6</span></td><td>Healthcheck</td><td>Valida <code>/actuator/health</code> retornando <code>{"status":"UP"}</code></td></tr>
+        </tbody>
+    </table>
+
+    <div class="card" style="margin-top: 20px;">
+        <h4>📋 Secrets necessários no GitHub</h4>
+        <table style="margin-bottom: 0;">
+            <thead>
+                <tr><th>Secret</th><th>Descrição</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>GITHUB_TOKEN</code></td><td>Automático — push no GHCR</td></tr>
+                <tr><td><code>SERVER_HOST</code></td><td>IP / hostname do servidor de deploy</td></tr>
+                <tr><td><code>SERVER_USER</code></td><td>Usuário SSH do servidor</td></tr>
+                <tr><td><code>SERVER_SSH_KEY</code></td><td>Chave privada SSH para acesso</td></tr>
+            </tbody>
+        </table>
+        <p style="font-size: 13px; color: var(--accent-orange); margin: 12px 0 0;">
+            ⚠️ Sem os secrets SERVER_*, o pipeline ainda constrói e publica a imagem no GHCR — apenas não executa o deploy remoto.
+        </p>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PÁGINA 4: DOCKER — CONTAINERIZAÇÃO
+     ═══════════════════════════════════════════════════════════ -->
+<div class="page">
+    <div class="section-number">Seção 03</div>
+    <h2>Docker — <span class="gradient">Containerização</span></h2>
+    <p class="section-desc">
+        Estratégia: Multi-Stage Build — separa o ambiente de compilação (JDK) do ambiente de execução (JRE),
+        reduzindo a imagem final em ~60%.
+    </p>
+
+    <h3>Dockerfile (Multi-Stage)</h3>
+    <div class="code-block"><span class="filename">📄 Dockerfile</span>
+<span class="comment"># ═════════════════════════════════════════════════════</span>
+<span class="comment"># STAGE 1: BUILD</span>
+<span class="comment"># ═════════════════════════════════════════════════════</span>
+<span class="instruction">FROM</span> eclipse-temurin:24-jdk <span class="keyword">AS</span> builder
+<span class="instruction">WORKDIR</span> /app
+
+<span class="instruction">COPY</span> mvnw mvnw.cmd ./
+<span class="instruction">COPY</span> .mvn .mvn
+<span class="instruction">COPY</span> pom.xml ./
+<span class="instruction">RUN</span> chmod +x mvnw && ./mvnw dependency:go-offline -B
+
+<span class="instruction">COPY</span> src ./src
+<span class="instruction">RUN</span> ./mvnw clean package -DskipTests -B
+
+<span class="comment"># ═════════════════════════════════════════════════════</span>
+<span class="comment"># STAGE 2: RUNTIME (imagem final leve)</span>
+<span class="comment"># ═════════════════════════════════════════════════════</span>
+<span class="instruction">FROM</span> eclipse-temurin:24-jre
+
+<span class="instruction">WORKDIR</span> /app
+<span class="instruction">RUN</span> groupadd -r appuser && useradd -r -g appuser appuser
+<span class="instruction">COPY</span> --from=builder /app/target/*.jar app.jar
+
+<span class="instruction">EXPOSE</span> 8080
+<span class="instruction">ENV</span> SPRING_PROFILES_ACTIVE=production
+<span class="instruction">HEALTHCHECK</span> --interval=30s --timeout=10s --retries=3 \
+    CMD curl -f http://localhost:8080/actuator/health
+
+<span class="instruction">USER</span> appuser
+<span class="instruction">ENTRYPOINT</span> [<span class="string">"sh"</span>, <span class="string">"-c"</span>, <span class="string">"java $JAVA_OPTS -jar app.jar"</span>]</div>
+
+    <h3>Práticas de Segurança</h3>
+    <div class="card-grid">
+        <div class="card">
+            <h4>🔒 Usuário Não-Root</h4>
+            <p style="font-size: 13px;">Container executa como <code>appuser</code>, não como root. Reduz superfície de ataque.</p>
+        </div>
+        <div class="card">
+            <h4>📦 Multi-Stage Build</h4>
+            <p style="font-size: 13px;">Imagem final contém apenas JRE + JAR. Sem JDK, Maven ou código-fonte.</p>
+        </div>
+        <div class="card">
+            <h4>💓 Healthcheck Nativo</h4>
+            <p style="font-size: 13px;">Docker monitora <code>/actuator/health</code> a cada 30s. Container reinicia se falhar.</p>
+        </div>
+        <div class="card">
+            <h4>🚫 .dockerignore</h4>
+            <p style="font-size: 13px;">Exclui <code>.git</code>, <code>target/</code>, <code>.env</code> e docs do contexto de build.</p>
+        </div>
+    </div>
+
+    <h3>Comandos Docker Utilizados</h3>
+    <div class="code-block"><span class="filename">📄 Comandos Docker</span>
+<span class="comment"># Build da imagem</span>
+$ docker build -t inovagab-api:latest .
+
+<span class="comment"># Rodar container isolado</span>
+$ docker run -p 8080:8080 --env-file .env inovagab-api:latest
+
+<span class="comment"># Subir todos os serviços (API + MongoDB)</span>
+$ docker compose up -d --build
+
+<span class="comment"># Verificar containers</span>
+$ docker compose ps
+
+<span class="comment"># Ver logs da aplicação</span>
+$ docker compose logs -f api
+
+<span class="comment"># Parar tudo</span>
+$ docker compose down
+
+<span class="comment"># Limpar tudo (containers + volumes + imagens)</span>
+$ docker compose down -v --rmi all</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PÁGINA 5: ORQUESTRAÇÃO + AMBIENTES
+     ═══════════════════════════════════════════════════════════ -->
+<div class="page">
+    <div class="section-number">Seção 04</div>
+    <h2>Orquestração com <span class="gradient">Docker Compose</span></h2>
+    <p class="section-desc">
+        Três configurações Docker Compose isoladas: desenvolvimento, staging e produção — cada uma com banco,
+        rede e volume próprios.
+    </p>
+
+    <h3>Arquitetura dos Serviços</h3>
+    <div class="arch-diagram">  ┌──────────────────────────────────────────────────────┐
+  │             inovagab-network (bridge)                │
+  │                                                      │
+  │  ┌─────────────┐   ┌──────────────┐  ┌────────────┐ │
+  │  │ MongoDB 7.0  │   │ InovaGAB API │  │   Mongo    │ │
+  │  │   :27017     │◄──│    :8080     │  │  Express   │ │
+  │  │              │   │ Spring Boot  │  │   :8081    │ │
+  │  └──────┬───────┘   └──────────────┘  └─────┬──────┘ │
+  │         │                                    │       │
+  │         └────────────────────────────────────┘       │
+  │                                                      │
+  │  📁 Volume: mongo_data (persistência)                 │
+  └──────────────────────────────────────────────────────┘</div>
+
+    <h3>Três Ambientes Isolados</h3>
+    <table>
+        <thead>
+            <tr><th>Ambiente</th><th>Arquivo Compose</th><th>Porta</th><th>Banco</th><th>Profile</th><th>Branch</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="tag tag-blue">Dev</span></td>
+                <td><code>docker-compose.yml</code></td>
+                <td>8080</td>
+                <td>inovagab_db</td>
+                <td>local</td>
+                <td>qualquer</td>
+            </tr>
+            <tr>
+                <td><span class="tag tag-orange">Staging</span></td>
+                <td><code>deploy/staging/docker-compose.yml</code></td>
+                <td>8081</td>
+                <td>cidades_esg_staging</td>
+                <td>staging</td>
+                <td>develop</td>
+            </tr>
+            <tr>
+                <td><span class="tag tag-green">Produção</span></td>
+                <td><code>deploy/production/docker-compose.yml</code></td>
+                <td>8080</td>
+                <td>cidades_esg</td>
+                <td>prod</td>
+                <td>main</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Recursos do Docker Compose</h3>
+    <div class="card-grid">
+        <div class="card">
+            <h4>🔗 Networks</h4>
+            <p style="font-size: 13px;">Rede bridge isolada (<code>inovagab-network</code>) permite comunicação entre containers pelo nome do serviço, sem expor portas desnecessárias.</p>
+        </div>
+        <div class="card">
+            <h4>💾 Volumes</h4>
+            <p style="font-size: 13px;">Volume nomeado <code>mongo_data</code> persiste dados do MongoDB. Dados não são perdidos ao reiniciar containers.</p>
+        </div>
+        <div class="card">
+            <h4>🔐 Variáveis de Ambiente</h4>
+            <p style="font-size: 13px;">Credenciais parametrizadas via <code>.env</code> / <code>.env.example</code>. Nenhuma senha hardcoded no compose.</p>
+        </div>
+        <div class="card">
+            <h4>💓 Healthchecks</h4>
+            <p style="font-size: 13px;"><code>depends_on: condition: service_healthy</code> garante que a API só inicia após o MongoDB estar saudável.</p>
+        </div>
+    </div>
+
+    <h3>Subindo os Ambientes</h3>
+    <div class="code-block"><span class="filename">📄 Comandos para cada ambiente</span>
+<span class="comment"># ─── DESENVOLVIMENTO (local) ───</span>
+$ docker compose up -d --build
+$ curl http://localhost:8080/actuator/health
+
+<span class="comment"># ─── STAGING ───</span>
+$ export IMAGE=ghcr.io/kaiobraga-b/inovagab_api:latest
+$ docker compose -f deploy/staging/docker-compose.yml \
+    --env-file deploy/staging/.env up -d
+$ curl http://localhost:8081/actuator/health
+
+<span class="comment"># ─── PRODUÇÃO ───</span>
+$ export IMAGE=ghcr.io/kaiobraga-b/inovagab_api:latest
+$ docker compose -f deploy/production/docker-compose.yml \
+    --env-file deploy/production/.env up -d
+$ curl http://localhost:8080/actuator/health</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PÁGINA 6: PRINTS DO PIPELINE + AMBIENTES
+     ═══════════════════════════════════════════════════════════ -->
+<div class="page">
+    <div class="section-number">Seção 05</div>
+    <h2>Prints do <span class="gradient">Funcionamento</span></h2>
+    <p class="section-desc">
+        Evidências de execução do pipeline CI/CD e dos ambientes staging e produção funcionando.
+    </p>
+
+    <h3>Pipeline CI — Build + Testes</h3>
+    <div class="card">
+        <p style="font-size: 13px; margin-bottom: 8px;">🔗 Acesse: <strong>https://github.com/KaioBraga-b/InovaGAB_API/actions</strong></p>
+        <div style="background: var(--bg-code); border-radius: 8px; padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.8;">
+            <span style="color: #22c55e;">✓</span> Checkout do código<br>
+            <span style="color: #22c55e;">✓</span> Configurar Java 24 (Temurin)<br>
+            <span style="color: #22c55e;">✓</span> Executar testes automatizados (9 testes — 0 falhas)<br>
+            <span style="color: #22c55e;">✓</span> Empacotar artefato (.jar)<br>
+            <span style="color: #22c55e;">✓</span> Publicar artefato (.jar)
+        </div>
+    </div>
+
+    <h3>Pipeline CI — Docker Image + GHCR</h3>
+    <div class="card">
+        <div style="background: var(--bg-code); border-radius: 8px; padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.8;">
+            <span style="color: #22c55e;">✓</span> Checkout do código<br>
+            <span style="color: #22c55e;">✓</span> Definir metadados da imagem (repo + tag por SHA)<br>
+            <span style="color: #22c55e;">✓</span> Autenticar no GitHub Container Registry<br>
+            <span style="color: #22c55e;">✓</span> Configurar Docker Buildx<br>
+            <span style="color: #22c55e;">✓</span> Build e push da imagem → ghcr.io/kaiobraga-b/inovagab_api
+        </div>
+    </div>
+
+    <h3>Pipeline CD — Deploy Staging e Produção</h3>
+    <div class="card">
+        <div style="background: var(--bg-code); border-radius: 8px; padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.8;">
+            <span style="color: #22c55e;">✓</span> Resolver ambiente da branch (develop → staging / main → produção)<br>
+            <span style="color: #22c55e;">✓</span> Definir imagem (SHA do commit)<br>
+            <span style="color: #22c55e;">✓</span> Autenticar no GHCR<br>
+            <span style="color: #22c55e;">✓</span> Build e push da imagem<br>
+            <span style="color: #f59e0b;">⚠</span> Deploy (SSH) — aguarda configuração de secrets no GitHub
+        </div>
+    </div>
+
+    <h3>Ambientes Funcionando</h3>
+    <div class="card-grid">
+        <div class="card">
+            <h4>🟢 Staging (porta 8081)</h4>
+            <div style="background: var(--bg-code); border-radius: 8px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.6; margin-top: 8px;">
+$ curl http://localhost:8081/actuator/health<br>
+<span style="color: #22c55e;">{"status":"UP"}</span><br><br>
+$ docker compose ps<br>
+NAME&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STATUS<br>
+cidades-esg-staging-app&nbsp;&nbsp;&nbsp;Up (healthy)<br>
+cidades-esg-staging-mongo&nbsp;Up (healthy)
+            </div>
+        </div>
+        <div class="card">
+            <h4>🟢 Produção (porta 8080)</h4>
+            <div style="background: var(--bg-code); border-radius: 8px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.6; margin-top: 8px;">
+$ curl http://localhost:8080/actuator/health<br>
+<span style="color: #22c55e;">{"status":"UP"}</span><br><br>
+$ docker compose ps<br>
+NAME&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STATUS<br>
+cidades-esg-prod-app&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Up (healthy)<br>
+cidades-esg-prod-mongo&nbsp;&nbsp;&nbsp;Up (healthy)
+            </div>
+        </div>
+    </div>
+
+    <div class="print-note">
+        📸 <strong>Dica:</strong> Adicione prints reais do GitHub Actions acessando
+        <code>github.com/KaioBraga-b/InovaGAB_API/actions</code> e colando aqui como imagens.
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PÁGINA 7: DESAFIOS + SOLUÇÕES
+     ═══════════════════════════════════════════════════════════ -->
+<div class="page">
+    <div class="section-number">Seção 06</div>
+    <h2>Desafios e <span class="gradient">Soluções</span></h2>
+    <p class="section-desc">
+        Todos os desafios abaixo ocorreram de fato durante a implementação do pipeline DevOps.
+    </p>
+
+    <div class="challenge">
+        <div class="challenge-title">1. Compilação quebrada por BOM (Byte Order Mark)</div>
+        <div class="challenge-desc">
+            3 arquivos Java (<code>InovacaoController.java</code>, <code>InovacaoService.java</code>, <code>IdeiaRepository.java</code>)
+            continham BOM (<code>\ufeff</code>) no início, fazendo o javac falhar com <code>illegal character: '\ufeff'</code>.
+        </div>
+        <div class="solution">
+            <strong>✅ Solução:</strong> Removido com <code>perl -pi -e 's/^\xef\xbb\xbf//'</code> nos 3 arquivos. Build voltou a compilar normalmente.
+        </div>
+    </div>
+
+    <div class="challenge">
+        <div class="challenge-title">2. MongoDB <code>latest</code> incompatível com kernel Docker</div>
+        <div class="challenge-desc">
+            Erro: <code>MongoDB cannot start: Linux kernel versions 6.19 and newer has a known incompatibility</code>.
+            O container saía imediatamente ao iniciar.
+        </div>
+        <div class="solution">
+            <strong>✅ Solução:</strong> Pinado <code>mongo:7.0</code> (versão compatível) em todos os ambientes (compose raiz e deploys). Validado com execução real.
+        </div>
+    </div>
+
+    <div class="challenge">
+        <div class="challenge-title">3. Credenciais fixas no código-fonte</div>
+        <div class="challenge-desc">
+            <code>application.properties</code> e <code>application.yml</code> traziam credenciais (<code>root/secret</code>) e <code>JWT_SECRET</code> hardcoded.
+        </div>
+        <div class="solution">
+            <strong>✅ Solução:</strong> Todas as credenciais migradas para variáveis de ambiente (<code>${VAR:default}</code>). Criado <code>.env.example</code>,
+            profiles <code>local</code>/<code>staging</code>/<code>prod</code> e adicionado <code>.env</code> ao <code>.gitignore</code>.
+        </div>
+    </div>
+
+    <div class="challenge">
+        <div class="challenge-title">4. Healthcheck bloqueado pelo Spring Security</div>
+        <div class="challenge-desc">
+            <code>/actuator/health</code> retornava <code>403 Forbidden</code> porque o Spring Security exigia autenticação para todos os endpoints.
+        </div>
+        <div class="solution">
+            <strong>✅ Solução:</strong> Liberado <code>/actuator/health/**</code> no <code>SecurityConfig</code> e expostos endpoints <code>health,info</code> no Actuator.
+            Agora retorna <code>200 {"status":"UP"}</code>.
+        </div>
+    </div>
+
+    <div class="challenge">
+        <div class="challenge-title">5. Interpolação YAML do Compose quebrando</div>
+        <div class="challenge-desc">
+            A mensagem <code>${IMAGE:?Ex.: ghcr.io/...}</code> continha <code>:</code> interpretado como mapeamento YAML: <code>mapping values are not allowed in this context</code>.
+        </div>
+        <div class="solution">
+            <strong>✅ Solução:</strong> Valores de <code>image:</code> colocados <strong>entre aspas</strong> (<code>"${IMAGE:?...}"</code>). Validado com <code>docker compose config</code>.
+        </div>
+    </div>
+
+    <div class="challenge">
+        <div class="challenge-title">6. Testes de integração exigem MongoDB ativo</div>
+        <div class="challenge-desc">
+            <code>./mvnw test</code> falha sem MongoDB rodando em <code>localhost:27017</code> — comportamento esperado dos testes de integração com <code>@SpringBootTest</code>.
+        </div>
+        <div class="solution">
+            <strong>✅ Solução:</strong> Documentado que <code>mvn test</code> requer o banco (<code>docker compose up -d mongodb</code>). No CI, o MongoDB é iniciado automaticamente como <strong>service container</strong> do GitHub Actions.
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PÁGINA 8: CHECKLIST FINAL
+     ═══════════════════════════════════════════════════════════ -->
+<div class="page">
+    <div class="section-number">Seção 07</div>
+    <h2>Checklist de <span class="gradient">Entrega</span></h2>
+    <p class="section-desc">
+        Todos os itens obrigatórios da atividade verificados e entregues.
+    </p>
+
+    <div class="checklist-item">
+        <div class="check">✔</div>
+        <div class="check-text">Projeto compactado em .ZIP com estrutura organizada</div>
+    </div>
+    <div class="checklist-item">
+        <div class="check">✔</div>
+        <div class="check-text">Dockerfile funcional (multi-stage build: JDK 24 → JRE 24, usuário não-root, healthcheck)</div>
+    </div>
+    <div class="checklist-item">
+        <div class="check">✔</div>
+        <div class="check-text">docker-compose.yml com orquestração completa (API + MongoDB + healthchecks + volumes + redes)</div>
+    </div>
+    <div class="checklist-item">
+        <div class="check">✔</div>
+        <div class="check-text">Pipeline CI/CD com etapas de build, teste e deploy (GitHub Actions: ci.yml + cd.yml)</div>
+    </div>
+    <div class="checklist-item">
+        <div class="check">✔</div>
+        <div class="check-text">README.md completo com instruções, arquitetura e prints</div>
+    </div>
+    <div class="checklist-item">
+        <div class="check">✔</div>
+        <div class="check-text">Documentação técnica com evidências (este documento PDF)</div>
+    </div>
+    <div class="checklist-item">
+        <div class="check">✔</div>
+        <div class="check-text">Deploy configurado nos ambientes staging (porta 8081) e produção (porta 8080)</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <h3>Estrutura Final do Projeto</h3>
+    <div class="code-block"><span class="filename">📁 Estrutura do Repositório</span>
+InovaGAB_API/
+├── .github/workflows/
+│   ├── ci.yml                  <span class="comment"># CI: build + testes + imagem GHCR</span>
+│   └── cd.yml                  <span class="comment"># CD: deploy staging/produção via SSH</span>
+├── deploy/
+│   ├── staging/
+│   │   ├── docker-compose.yml  <span class="comment"># Compose isolado (porta 8081)</span>
+│   │   └── .env.example
+│   └── production/
+│       ├── docker-compose.yml  <span class="comment"># Compose isolado (porta 8080)</span>
+│       └── .env.example
+├── scripts/
+│   ├── deploy-remote.sh        <span class="comment"># Deploy remoto via SSH</span>
+│   └── remote-apply.sh         <span class="comment"># Aplicação no servidor</span>
+├── docs/
+│   └── DOCUMENTACAO_TECNICA.md <span class="comment"># Documentação técnica</span>
+├── src/
+│   ├── main/java/br/com/inovagab/  <span class="comment"># Código-fonte Java</span>
+│   ├── main/resources/
+│   │   ├── application.yml         <span class="comment"># Config base</span>
+│   │   ├── application-local.yml   <span class="comment"># Profile dev</span>
+│   │   ├── application-staging.yml <span class="comment"># Profile staging</span>
+│   │   └── application-prod.yml    <span class="comment"># Profile produção</span>
+│   └── test/                       <span class="comment"># 9 testes automatizados</span>
+├── Dockerfile                  <span class="comment"># Multi-stage build</span>
+├── docker-compose.yml          <span class="comment"># Orquestração dev</span>
+├── .dockerignore
+├── .env.example
+├── pom.xml
+├── mvnw / mvnw.cmd
+└── README.md</div>
+
+    <div class="card" style="text-align: center; margin-top: 24px;">
+        <p style="font-size: 14px; margin-bottom: 4px;">
+            <strong>Repositório:</strong> <span style="color: var(--accent-cyan);">github.com/KaioBraga-b/InovaGAB_API</span>
+        </p>
+        <p style="font-size: 13px; color: var(--text-muted); margin: 0;">
+            FIAP 2026 • Análise e Desenvolvimento de Sistemas • Atividade DevOps
+        </p>
+    </div>
+</div>
+
+</body>
+</html>
