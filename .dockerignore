@@ -1,13 +1,34 @@
-# Contexto de build — arquivos desnecessários para a imagem
+# ==============================================================================
+# .dockerignore — Arquivos excluídos do contexto de build Docker
+# ==============================================================================
 .git
-.github
-target
-deploy
-docs
-*.md
-.env
-deploy/*/.env
 .gitignore
-.gitattributes
+.vscode
+.idea
+*.iml
+*.iws
+*.ipr
+
+# Diretórios de build local
+target/
+build/
+dist/
+
+# Documentação e metadados
+*.md
+!README.md
+LICENSE
+docs/
+
+# Variáveis de ambiente locais
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# Docker
+docker-compose*.yml
 Dockerfile
-docker-compose.yml
+.dockerignore

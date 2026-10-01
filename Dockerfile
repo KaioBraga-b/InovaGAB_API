@@ -1,59 +1,53 @@
 # ============================================================
-# Dockerfile — Cidades ESG Inteligentes (InovaGAB_API)
-# Multi-stage build:
-#   Stage 1 (builder): compila com JDK 24 + Maven wrapper
-#   Stage 2 (runtime): imagem mínima com JRE 24 e usuário não-root
+# STAGE 1: BUILD — Compila a aplicação com Maven (multi-stage)
 # ============================================================
-
-# ---------- Stage 1: BUILD ----------
 FROM eclipse-temurin:24-jdk AS builder
+
 WORKDIR /app
 
-# Copia apenas o necessário para baixar dependências primeiro
-# (aproveita cache de camadas Docker em builds repetidos)
+# Copia wrapper e configurações Maven primeiro (melhor cache de camadas)
+COPY mvnw mvnw.cmd ./
 COPY .mvn .mvn
-COPY mvnw pom.xml ./
-RUN chmod +x mvnw && ./mvnw -B -q dependency:go-offline
+COPY pom.xml ./
 
-# Copia o código-fonte e gera o artefato (testes rodam no CI)
-COPY src src
-RUN ./mvnw -B -DskipTests package
+# Baixa dependências offline (cache layer separada)
+RUN chmod +x mvnw && ./mvnw dependency:go-offline -B
 
-# ---------- Stage 2: RUNTIME ----------
-FROM eclipse-temurin:24-jre AS runtime
+# Copia código-fonte
+COPY src ./src
 
-# Usuário não-root (boas práticas de segurança)
-RUN groupadd -r app && useradd -r -g app -d /app app
+# Build do JAR sem executar os testes (serão executados na pipeline CI/CD)
+RUN ./mvnw clean package -DskipTests -B
+
+# ============================================================
+# STAGE 2: RUNTIME — Imagem final leve somente com JRE
+# ============================================================
+FROM eclipse-temurin:24-jre
+
+LABEL maintainer="InovaGAB Team <kaio@fiap.com>"
+LABEL description="InovaGAB API — Cidades ESG Inteligentes"
 
 WORKDIR /app
 
-# curl para healthcheck dentro do container
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl \
-    && rm -rf /var/lib/apt/lists/*
+# Cria usuário não-root para segurança
+RUN groupadd -r appuser && useradd -r -g appuser appuser
 
+# Copia o JAR compilado do stage anterior
 COPY --from=builder /app/target/*.jar app.jar
 
-# Porta padrão da aplicação (sobrescrevível via SERVER_PORT)
+# Expõe a porta da aplicação
 EXPOSE 8080
 
-# Variáveis de ambiente lidas pela aplicação.
-# Apenas valores não sensíveis ficam fixos na imagem.
-# Credenciais (MONGO_PASSWORD, JWT_SECRET, ...) DEVEM ser injetadas
-# em runtime via compose/--env-file (ver .env.example).
-ENV SERVER_PORT=8080 \
-    SPRING_PROFILES_ACTIVE=local \
-    MONGO_HOST=localhost \
-    MONGO_PORT=27017 \
-    MONGO_DATABASE=inovagab_db \
-    MONGO_USERNAME=root
+# Define variáveis de ambiente padrão (podem ser sobrescritas pelo docker-compose)
+ENV SPRING_PROFILES_ACTIVE=production \
+    JAVA_OPTS="-Xms256m -Xmx512m"
 
-# MONGO_PASSWORD, MONGO_AUTH_DB e JWT_SECRET:
-# injetados em runtime (compose/.env/--env-file)
+# Healthcheck integrado
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=40s \
+    CMD curl -f http://localhost:8080/actuator/health || exit 1
 
-USER app
+# Executa como usuário não-root
+USER appuser
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
-    CMD curl -fsS http://localhost:${SERVER_PORT:-8080}/actuator/health || exit 1
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Entrypoint com suporte a JAVA_OPTS
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

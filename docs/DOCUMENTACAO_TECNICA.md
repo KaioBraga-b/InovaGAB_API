@@ -11,8 +11,8 @@
 | Projeto | Cidades ESG Inteligentes (InovaGAB API) |
 | Repositório | https://github.com/KaioBraga-b/InovaGAB_API |
 | Disciplina | DevOps (atividade acadêmica) |
-| Aluno/Equipe | _[preencher nomes]_ |
-| Data | _[preencher]_ |
+| Aluno/Equipe | Gabriel A. L. de Campos (RM562021), Henry G. Ferreira (RM565688), Kaio H. V. Braga (RM565115), Marianna R. de Miranda (RM566305), Wesley A. Chaves (RM563114) |
+| Data | 30/09/2026 |
 
 ---
 

@@ -1,66 +1,97 @@
-# ============================================================
-# Docker Compose — Cidades ESG Inteligentes (InovaGAB_API)
-# Ambiente local: aplicação Java Spring + MongoDB
-# Uso:  cp .env.example .env  (opcional)  ->  docker compose up -d
-# ============================================================
+# ==============================================================================
+# Docker Compose — InovaGAB API (Cidades ESG Inteligentes)
+# Orquestra: Aplicação Spring Boot + MongoDB + Mongo Express (admin UI)
+# ==============================================================================
 
 services:
-
+  # ============================================================================
+  # MongoDB 7.0 — Banco NoSQL principal
+  # ============================================================================
   mongodb:
     image: mongo:7.0
-    container_name: cidades-esg-mongodb
+    container_name: inovagab-mongo
     restart: unless-stopped
     environment:
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-inovagab_db}
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-root}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-secret}
-      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-inovagab_db}
     ports:
       - "${MONGO_PORT:-27017}:27017"
     volumes:
       - mongo_data:/data/db
     networks:
-      - cidades-esg-network
+      - inovagab-network
     healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 20s
+      start_period: 30s
 
-  app:
-    build: .
-    image: cidades-esg:local
-    container_name: cidades-esg-app
+  # ============================================================================
+  # Mongo Express — Interface Web para administração do MongoDB
+  # ============================================================================
+  mongo-express:
+    image: mongo-express:1.0
+    container_name: inovagab-mongo-express
     restart: unless-stopped
     depends_on:
       mongodb:
         condition: service_healthy
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
-      SERVER_PORT: "8080"
-      # A aplicação acessa o banco pelo NOME do serviço (não localhost)
-      MONGO_HOST: mongodb
-      MONGO_PORT: "27017"
-      MONGO_DATABASE: ${MONGO_DATABASE:-inovagab_db}
-      MONGO_USERNAME: ${MONGO_USERNAME:-root}
-      MONGO_PASSWORD: ${MONGO_PASSWORD:-secret}
-      MONGO_AUTH_DB: ${MONGO_AUTH_DB:-admin}
-      JWT_SECRET: ${JWT_SECRET:-my-dev-secret-for-jwt-generation-which-should-be-changed-in-production}
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USERNAME:-root}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD:-secret}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USERNAME:-root}:${MONGO_PASSWORD:-secret}@mongodb:27017/
+      ME_CONFIG_BASICAUTH: "true"
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USER:-admin}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASS:-admin123}
     ports:
-      - "${APP_PORT:-8080}:8080"
+      - "${MONGO_EXPRESS_PORT:-8081}:8081"
     networks:
-      - cidades-esg-network
+      - inovagab-network
+
+  # ============================================================================
+  # InovaGAB API — Aplicação Spring Boot (Java 24)
+  # ============================================================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: inovagab-api
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-production}
+      SPRING_DATA_MONGODB_HOST: mongodb
+      SPRING_DATA_MONGODB_PORT: 27017
+      SPRING_DATA_MONGODB_DATABASE: ${MONGO_DATABASE:-inovagab_db}
+      SPRING_DATA_MONGODB_USERNAME: ${MONGO_USERNAME:-root}
+      SPRING_DATA_MONGODB_PASSWORD: ${MONGO_PASSWORD:-secret}
+      SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE: admin
+      INOVAGAB_JWT_SECRET: ${JWT_SECRET:-9a3f8b1c4e7d2a5f8e0b3c6d9a1f4e7d2a5f8e0b3c6d9a1f4e7d2a5f8e0b3c6d}
+      INOVAGAB_JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+      JAVA_OPTS: ${JAVA_OPTS:--Xms256m -Xmx512m}
+    ports:
+      - "${API_PORT:-8080}:8080"
+    networks:
+      - inovagab-network
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
       start_period: 40s
 
+# ==============================================================================
+# Rede e Volumes persistentes
+# ==============================================================================
 networks:
-  cidades-esg-network:
+  inovagab-network:
     driver: bridge
+    name: inovagab-network
 
 volumes:
   mongo_data:
-    name: cidades-esg-mongo-data
+    name: inovagab-mongo-data
