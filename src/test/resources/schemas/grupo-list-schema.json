@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GrupoListResponse",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": { "type": "string" },
+      "hashId": { "type": "string" },
+      "nome": { "type": "string" },
+      "departamento": { "type": ["string", "null"] },
+      "descricao": { "type": ["string", "null"] },
+      "gestorId": { "type": "string" },
+      "gestorEmail": { "type": ["string", "null"] },
+      "dataCriacao": { "type": ["string", "null"] },
+      "membros": { "type": "array" },
+      "totalMembros": { "type": "integer" }
+    },
+    "required": ["id", "hashId", "nome", "gestorId"]
+  }
+}

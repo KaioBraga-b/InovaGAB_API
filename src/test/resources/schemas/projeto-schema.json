@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ProjetoResponse",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "titulo": { "type": "string" },
+    "status": { "type": ["string", "null"] },
+    "area": { "type": ["string", "null"] },
+    "periodo": { "type": ["string", "null"] },
+    "progresso": { "type": ["number", "null"] },
+    "progressoTexto": { "type": ["string", "null"] },
+    "investimento": { "type": ["string", "null"] },
+    "estrategiaId": { "type": ["string", "null"] },
+    "estrategiaTitulo": { "type": ["string", "null"] },
+    "lucroObtido": { "type": ["number", "null"] },
+    "aumentoProdutividade": { "type": ["number", "null"] },
+    "roi": { "type": ["number", "null"] },
+    "groupId": { "type": ["string", "null"] }
+  },
+  "required": ["id", "titulo"]
+}

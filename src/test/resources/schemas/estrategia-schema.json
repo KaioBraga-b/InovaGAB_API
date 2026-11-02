@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EstrategiaResponse",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "titulo": { "type": "string" },
+    "descricao": { "type": ["string", "null"] },
+    "status": { "type": ["string", "null"] },
+    "categoria": { "type": ["string", "null"] },
+    "campanha": { "type": ["string", "null"] },
+    "progresso": { "type": ["number", "null"] },
+    "groupId": { "type": ["string", "null"] }
+  },
+  "required": ["id", "titulo"]
+}

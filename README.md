@@ -319,24 +319,140 @@ src/main/java/br/com/inovagab/
 
 ---
 
-## 🧪 Testes Automatizados
+## 🧪 Testes Automatizados (BDD com Gherkin, APIs e JSON Schema ESG)
 
-Para executar a suíte de testes unitários e de integração:
+A plataforma conta com uma suíte abrangente de **59 testes automatizados**, combinando **BDD (Behavior Driven Development)** via **Cucumber** com testes de integração e contrato via **REST-Assured** e **JSON Schema Validator**, totalmente integrados aos princípios **ESG (Environmental, Social, Governance)**.
+
+### 📐 Pirâmide e Estratégia de Testes
+
+```
+                  /\
+                 /  \     BDD Gherkin / E2E (Cucumber)
+                /    \    • 13 cenários comportamentais focados em ESG
+               /──────\   
+              /        \  Testes de API & Contrato (REST-Assured + JSON Schema)
+             /          \ • 100% dos endpoints cobertos (Status, Payload, Schemas)
+            /────────────\
+           /              \ Testes de Unidade e Serviços
+          /────────────────\ • GrupoService, JwtTokenProvider, Security
+```
+
+### 🌿 Pilares ESG Validados nos Cenários de Teste
+
+| Pilar ESG | Dimensão Testada | Exemplo Prático no Sistema |
+|:----------|:-----------------|:---------------------------|
+| **🌳 Environmental (Ambiental)** | Eficiência energética, reciclagem e redução de pegada de carbono | Submissão e triagem de ideias de coleta seletiva IoT, compostagem e descarbonização da frota |
+| **🤝 Social (Social)** | Inclusão corporativa, diversidade e engajamento participativo | Votação democrática em ideias, cotas individuais de votos e squads de diversidade e acessibilidade PCD |
+| **⚖️ Governance (Governança)** | Compliance, controle de acesso RBAC, rastreabilidade e integridade | Bloqueio de não-gestores na criação de squads (400/403), expiração de JWT e validação estrita de contratos |
+| **📈 ROI & Accountability** | Otimização de recursos e sustentabilidade financeira | Monitoramento executivo no Dashboard de sustentabilidade com apuração de ROI e retorno por meta ODS |
+
+---
+
+### 📝 Cenários BDD em Gherkin (`src/test/resources/features/`)
+
+A suíte implementa **13 cenários de teste** estruturados em linguagem Gherkin em português, cobrindo fluxos positivos e negativos:
+
+1. **`01_autenticacao_seguranca_esg.feature`**:
+   - `Cenário 1 (Positivo)`: Registrar novo colaborador de sustentabilidade com sucesso e validação de schema.
+   - `Cenário 2 (Positivo)`: Autenticar gestor de sustentabilidade e obter token JWT rastreável.
+   - `Cenário 3 (Negativo)`: Falha de autenticação ao fornecer senha incorreta (rejeição 400 por compliance).
+   - `Cenário 4 (Positivo)`: Consultar perfil autenticado para auditoria e rastreabilidade corporativa.
+
+2. **`02_gestao_squads_esg.feature`**:
+   - `Cenário 5 (Positivo)`: Gestor cria Squad corporativa focada em Descarbonização da Frota (201 Created).
+   - `Cenário 6 (Positivo)`: Adição de membro especialista multidisciplinar à Squad de Sustentabilidade.
+   - `Cenário 7 (Negativo)`: Usuário sem permissão tenta criar Squad e recebe bloqueio por RBAC.
+
+3. **`03_inovacao_sustentavel_esg.feature`**:
+   - `Cenário 8 (Positivo)`: Submeter ideia de Coleta Inteligente de Resíduos e Logística Reversa IoT.
+   - `Cenário 9 (Positivo)`: Votação comunitária e colaboração em ideias de inclusão e acessibilidade.
+   - `Cenário 10 (Negativo)`: Validação de payload e integridade ao submeter ideias vazias.
+
+4. **`04_metricas_dashboard_roi_esg.feature`**:
+   - `Cenário 11 (Positivo)`: Cadastrar diretriz estratégica corporativa alinhada aos ODS da ONU (Redução de CO2).
+   - `Cenário 12 (Positivo)`: Registrar projeto de usina solar fotovoltaica com apuração de indicadores e ROI.
+   - `Cenário 13 (Positivo)`: Consulta ao Dashboard executivo com cálculo consolidado de ROI e metas ESG ativas.
+
+---
+
+### 🔌 Cobertura Completa de APIs e Validação de Contrato (JSON Schema)
+
+Todos os endpoints da aplicação possuem testes automatizados que validam:
+1. **Status Code HTTP** (200, 201, 400, 403)
+2. **Corpo da Resposta (JSON)** (campos obrigatórios, valores esperados, tipos de dados)
+3. **Contratos JSON Schema** (verificação rigorosa de estrutura via Draft-07)
+
+| Controller | Endpoints Testados | Schemas JSON Validados |
+|:-----------|:-------------------|:-----------------------|
+| **AuthController** | `POST /api/auth/register`<br>`POST /api/auth/login`<br>`GET /api/auth/me` | `message-response-schema.json`<br>`auth-response-schema.json`<br>`user-profile-schema.json`<br>`error-response-schema.json` |
+| **GestorGrupoController** | `POST /api/gestor/grupos`<br>`GET /api/gestor/grupos`<br>`GET /api/gestor/grupos/{groupId}`<br>`PUT /api/gestor/grupos/{groupId}`<br>`POST /api/gestor/grupos/{groupId}/membros`<br>`DELETE /api/gestor/grupos/{groupId}/membros/{email}`<br>`GET /api/gestor/usuarios` | `grupo-response-schema.json`<br>`grupo-list-schema.json`<br>`usuarios-list-schema.json` |
+| **InovacaoController (Projetos)** | `POST /api/inovacao/projetos`<br>`GET /api/inovacao/projetos`<br>`PUT /api/inovacao/projetos/{id}`<br>`DELETE /api/inovacao/projetos/{id}` | `projeto-schema.json`<br>`projetos-list-schema.json` |
+| **InovacaoController (Estratégias)** | `POST /api/inovacao/estrategias`<br>`GET /api/inovacao/estrategias`<br>`PUT /api/inovacao/estrategias/{id}`<br>`DELETE /api/inovacao/estrategias/{id}` | `estrategia-schema.json`<br>`estrategias-list-schema.json` |
+| **InovacaoController (Ideias)** | `POST /api/inovacao/ideias`<br>`GET /api/inovacao/ideias`<br>`PUT /api/inovacao/ideias/{id}`<br>`POST /api/inovacao/ideias/{id}/votar`<br>`POST /api/inovacao/ideias/{id}/comentar`<br>`DELETE /api/inovacao/ideias/{id}` | `ideia-schema.json`<br>`ideias-list-schema.json` |
+| **InovacaoController (Transações)** | `POST /api/inovacao/transacoes`<br>`GET /api/inovacao/transacoes`<br>`POST /api/inovacao/receitas`<br>`GET /api/inovacao/receitas`<br>`POST /api/inovacao/despesas`<br>`GET /api/inovacao/despesas`<br>`DELETE /api/inovacao/transacoes/{id}` | `transacao-schema.json`<br>`transacoes-list-schema.json` |
+| **InovacaoController (Dashboard)** | `GET /api/inovacao/dashboard` | `dashboard-resumo-schema.json` |
+| **NotificacaoController** | `GET /api/notificacoes/{role}`<br>`PUT /api/notificacoes/{id}/lida` | `notificacao-schema.json`<br>`notificacoes-list-schema.json` |
+| **Actuator** | `GET /actuator/health` | `health-schema.json` |
+
+---
+
+### 🚀 Como Executar os Testes
+
+#### 1. Pré-requisito (Subir o MongoDB)
+
+Os testes de integração e BDD executam a aplicação Spring Boot real conectada ao MongoDB:
 
 ```bash
-# Com Maven Wrapper
+# Subir apenas o serviço do MongoDB em background
+docker compose up -d mongodb
+```
+
+#### 2. Executar toda a suíte de testes (59 testes)
+
+```bash
+# Executa todos os testes (Unitários, Integração, API e BDD Cucumber)
 ./mvnw test
 
-# Windows
+# No Windows
 .\mvnw.cmd test
 ```
 
-Os testes existentes cobrem:
-- ✅ Criação de grupos e delegação de roles
-- ✅ Isolamento de dados por `groupId`
-- ✅ Remoção de membros
-- ✅ Proteção contra IDOR (Insecure Direct Object Reference)
-- ✅ Auto-migração de senhas texto puro para BCrypt
+#### 3. Executar apenas os testes BDD com Cucumber
+
+```bash
+./mvnw test -Dtest=CucumberSuiteTest
+```
+
+#### 4. Executar apenas os testes de API e Contrato JSON Schema
+
+```bash
+./mvnw test -Dtest=*ApiTest
+```
+
+#### 5. Visualizar o Relatório Visual do Cucumber
+
+Após a execução, um relatório HTML rico e interativo é gerado em:
+👉 `target/cucumber-reports/cucumber.html`
+
+Abra no seu navegador:
+```bash
+# No macOS
+open target/cucumber-reports/cucumber.html
+
+# No Linux
+xdg-open target/cucumber-reports/cucumber.html
+
+# No Windows
+start target/cucumber-reports/cucumber.html
+```
+
+---
+
+### 📦 Artefatos de Entrega Gerados
+
+- **Código-fonte em arquivo .ZIP**: Execute `./scripts/package-project.sh` para gerar `InovaGAB_Testes_Automatizados.zip`.
+- **Relatório Técnico em PDF**: Documento completo disponível em `docs/InovaGAB_Evidencias_Testes_Automatizados_ESG.pdf`.
+- **Relatório Técnico em Markdown**: Disponível em `docs/RELATORIO_TESTES_AUTOMATIZADOS_BDD_API_ESG.md`.
 
 ---
 

@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "IdeiasListResponse",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": { "type": "string" },
+      "titulo": { "type": "string" },
+      "descricao": { "type": "string" },
+      "autor": { "type": ["string", "null"] },
+      "area": { "type": ["string", "null"] },
+      "status": { "type": ["string", "null"] },
+      "votos": { "type": ["integer", "null"] },
+      "groupId": { "type": ["string", "null"] }
+    },
+    "required": ["id", "titulo", "descricao"]
+  }
+}

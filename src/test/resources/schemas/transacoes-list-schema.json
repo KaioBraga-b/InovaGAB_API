@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TransacoesListResponse",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": { "type": "string" },
+      "projetoId": { "type": ["string", "null"] },
+      "tipo": { "type": "string" },
+      "descricao": { "type": ["string", "null"] },
+      "valor": { "type": "number" },
+      "groupId": { "type": ["string", "null"] }
+    },
+    "required": ["id", "tipo", "valor"]
+  }
+}

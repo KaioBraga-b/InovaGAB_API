@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UsuariosListResponse",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": { "type": "string" },
+      "nome": { "type": "string" },
+      "sobrenome": { "type": ["string", "null"] },
+      "email": { "type": "string" },
+      "role": { "type": ["string", "object", "null"] },
+      "unidade": { "type": ["string", "null"] },
+      "ativo": { "type": "boolean" },
+      "groupId": { "type": ["string", "null"] }
+    },
+    "required": ["id", "nome", "email"]
+  }
+}

@@ -55,8 +55,17 @@ jobs:
           java-version: '24'
           cache: maven
 
-      - name: Executar testes automatizados
+      - name: Executar testes automatizados (Unitários, BDD Gherkin e Contratos de API)
         run: ./mvnw -B test
+
+      - name: Publicar relatórios de testes (Cucumber HTML e Surefire)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-cucumber-surefire
+          path: |
+            target/cucumber-reports/
+            target/surefire-reports/
 
       - name: Empacotar artefato (.jar)
         run: ./mvnw -B -DskipTests package

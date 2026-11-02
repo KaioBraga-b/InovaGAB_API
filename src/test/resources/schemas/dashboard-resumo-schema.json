@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DashboardResumoResponse",
+  "type": "object",
+  "properties": {
+    "roiTotalPercentual": { "type": "number" },
+    "lucroObtidoTotal": { "type": "number" },
+    "investimentoTotal": { "type": "number" },
+    "projetosAtivos": { "type": "integer" },
+    "projetosNoPrazo": { "type": "integer" },
+    "ideiasRegistradas": { "type": "integer" },
+    "taxaEngajamento": { "type": "number" },
+    "aumentoMedioProdutividade": { "type": "number" },
+    "retornosPorEstrategia": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "object",
+        "properties": {
+          "estrategiaId": { "type": ["string", "null"] },
+          "estrategiaTitulo": { "type": ["string", "null"] },
+          "totalProjetos": { "type": "integer" },
+          "investimentoTotal": { "type": "number" },
+          "retornoTotal": { "type": "number" },
+          "roi": { "type": "number" }
+        }
+      }
+    }
+  },
+  "required": ["roiTotalPercentual", "lucroObtidoTotal", "investimentoTotal", "projetosAtivos"]
+}
